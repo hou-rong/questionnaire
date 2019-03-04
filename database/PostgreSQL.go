@@ -48,6 +48,17 @@ func ConnectPostgreSQL() () {
 		panic(err)
 	}
 
+	// The application ping the remote PostgreSQL database with the help of "gorm" package.
+	err = DBGORM.DB().Ping()
+	// If ping process to the remote PostgreSQL database raise error the application show an error message.
+	if err != nil {
+		log.Println(err)
+		panic(err)
+	}
+
+	// Enable logging mode of "gorm" package.
+	DBGORM.LogMode(true)
+
 	log.Println("RESTful web service successfully connected to remote PostgreSQL database with the help of \"gorm\" package.")
 
 	// The application defining the connection string for the remote PostgreSQL database with the help of the "database/sql" package.
@@ -61,7 +72,7 @@ func ConnectPostgreSQL() () {
 		panic(err)
 	}
 
-	// The application ping the remote PostgreSQL database to make sure it's alive.
+	// The application ping the remote PostgreSQL database with the help of "database/sql" package.
 	err = DBSQL.Ping()
 	// If ping process to the remote PostgreSQL database raise error the application show an error message.
 	if err != nil {
