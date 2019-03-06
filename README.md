@@ -30,5 +30,16 @@ A. *Category «Factors»*
 Set `Content-Type` as `application/json` in `POST` and `PUT` requests. In the body of these requests send JSON object with information about the specific factor.
 
 
+# Database Details
+
+If you get `ERROR: duplicate key violates unique constraint` message when trying to insert data into a `questions` table of the `PostgreSQL` database, try to execute such sql statement to fix error:
+```
+SELECT MAX(id) FROM questions;
+
+SELECT nextval('questions_id_seq');
+
+SELECT setval('questions_id_seq', (SELECT MAX(id) FROM options) + 1);
+```
+
 # License
 Copyright 2019, Kazakhstan, LLP «КаР-Тел» (Telecommunication Company «Beeline»). All rights reserved.

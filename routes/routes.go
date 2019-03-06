@@ -20,15 +20,27 @@ func Handle(router *mux.Router) {
 	router.HandleFunc("/api/factor/{factor_id:[0-9]+}", controllers.DeleteFactor).Methods("DELETE")
 	router.HandleFunc("/api/factor/{factor_id:[0-9]+}", controllers.UpdateFactor).Methods("PUT")
 
-	router.HandleFunc("/api/widgets_types", controllers.GetWidgetsTypes).Methods("GET")
-	router.HandleFunc("/api/widget_type", controllers.CreateWidgetType).Methods("POST")
-	router.HandleFunc("/api/widget_type/{widget_type:[0-9]+}", controllers.GetWidgetType).Methods("GET")
-	router.HandleFunc("/api/widget_type/{widget_type:[0-9]+}", controllers.DeleteWidgetType).Methods("DELETE")
-	router.HandleFunc("/api/widget_type/{widget_type:[0-9]+}", controllers.UpdateWidgetType).Methods("PUT")
-
 	router.HandleFunc("/api/options", controllers.GetOptions).Methods("GET")
 	router.HandleFunc("/api/option", controllers.CreateOption).Methods("POST")
 	router.HandleFunc("/api/option/{option_id:[0-9]+}", controllers.GetOption).Methods("GET")
 	router.HandleFunc("/api/option/{option_id:[0-9]+}", controllers.DeleteOption).Methods("DELETE")
 	router.HandleFunc("/api/option/{option_id:[0-9]+}", controllers.UpdateOption).Methods("PUT")
+
+	router.HandleFunc("/api/widgets", controllers.GetWidgets).Methods("GET")
+	router.HandleFunc("/api/widget", controllers.CreateWidget).Methods("POST")
+	router.HandleFunc("/api/widget/{widget_id:[0-9]+}", controllers.GetWidget).Methods("GET")
+	router.HandleFunc("/api/widget/{widget_id:[0-9]+}", controllers.DeleteWidget).Methods("DELETE")
+	router.HandleFunc("/api/widget/{widget_id:[0-9]+}", controllers.UpdateWidget).Methods("PUT")
+
+	router.HandleFunc("/api/questions", controllers.GetQuestions).Methods("GET")
+	router.HandleFunc("/api/question", controllers.CreateQuestion).Methods("POST")
+	router.HandleFunc("/api/question/{question_id:[0-9]+}", controllers.GetQuestion).Methods("GET")
+	router.HandleFunc("/api/question/{question_id:[0-9]+}", controllers.DeleteQuestion).Methods("DELETE")
+	router.HandleFunc("/api/question/{question_id:[0-9]+}", controllers.UpdateQuestion).Methods("PUT")
+
+	router.HandleFunc("/api/surveys", controllers.GetSurveys).Methods("GET")
+	router.HandleFunc("/api/survey", controllers.CreateSurvey).Methods("POST")
+	router.HandleFunc("/api/survey/{survey_id:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}}", controllers.GetSurvey).Methods("GET")
+	router.HandleFunc("/api/survey/{survey_id:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}}", controllers.DeleteSurvey).Methods("DELETE")
+	router.HandleFunc("/api/survey/{survey_id:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}}", controllers.UpdateSurvey).Methods("PUT")
 }
