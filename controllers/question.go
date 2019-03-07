@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
+	"log"
 	"net/http"
 	"questionnaire/database"
 	"questionnaire/models"
@@ -15,6 +16,7 @@ var GetQuestions = func(responseWriter http.ResponseWriter, request *http.Reques
 	// Execute the SQL query to take all questions and set it's result to the variable called "firstQuery".
 	firstQuery, err := database.DBSQL.Query("SELECT * FROM questions;")
 	if err != nil {
+		log.Println(err)
 		return
 	}
 
@@ -31,7 +33,8 @@ var GetQuestions = func(responseWriter http.ResponseWriter, request *http.Reques
 
 		// Call "Scan()" function on the result set of the first SQL query.
 		if err := firstQuery.Scan(&question.ID, &question.Text); err != nil {
-			continue
+			log.Println(err)
+			return
 		}
 
 		// Execute the SQL query to take information about the widget of the specific question and set it's result to the variable called "secondQuery".
@@ -49,6 +52,7 @@ var GetQuestions = func(responseWriter http.ResponseWriter, request *http.Reques
 		// Call "Scan()" function on the result set of the second SQL query.
 		err = secondQuery.Scan(&widget.ID, &widget.Name)
 		if err != nil {
+			log.Println(err)
 			return
 		}
 
@@ -64,6 +68,7 @@ var GetQuestions = func(responseWriter http.ResponseWriter, request *http.Reques
 		ON questions_options.option_id = options.id
 		WHERE questions_options.question_id = $1;`, question.ID)
 		if err != nil {
+			log.Println(err)
 			return
 		}
 
@@ -75,7 +80,8 @@ var GetQuestions = func(responseWriter http.ResponseWriter, request *http.Reques
 
 			// Call "Scan()" function on the result set of the third SQL query.
 			if err := thirdQuery.Scan(&option.ID, &option.Text); err != nil {
-				continue
+				log.Println(err)
+				return
 			}
 
 			// Set the information about all options of specific question to the "Options" field of the struct "Question".
@@ -154,6 +160,7 @@ var GetQuestion = func(responseWriter http.ResponseWriter, request *http.Request
 	// Call "Scan()" function on the result set of the second SQL query.
 	err = firstQuery.Scan(&widget.ID, &widget.Name)
 	if err != nil {
+		log.Println(err)
 		return
 	}
 
@@ -176,7 +183,8 @@ var GetQuestion = func(responseWriter http.ResponseWriter, request *http.Request
 
 		// Call "Scan()" function on the result set of the third SQL query.
 		if err := secondQuery.Scan(&option.ID, &option.Text); err != nil {
-			continue
+			log.Println(err)
+			return
 		}
 
 		// Set the information about all options of specific question to the "Options" field of the struct "Question".
@@ -247,6 +255,7 @@ var DeleteQuestion = func(responseWriter http.ResponseWriter, request *http.Requ
 	// Initialize the variable and assign object with information about the specific option to the variable if the record is exist in the database.
 	question := GetQuestionOr404(database.DBGORM, questionID, responseWriter, request)
 	if question == nil {
+		log.Println(err)
 		return
 	}
 

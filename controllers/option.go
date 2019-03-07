@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
+	"log"
 	"net/http"
 	"questionnaire/database"
 	"questionnaire/models"
@@ -87,6 +88,7 @@ var UpdateOption = func(responseWriter http.ResponseWriter, request *http.Reques
 	// Initialize the variable called "option" and assign object with information about the specific option to the variable if the record is exist in the database.
 	option := GetOptionOr404(database.DBGORM, optionID, responseWriter, request)
 	if option == nil {
+		log.Println(err)
 		return
 	}
 

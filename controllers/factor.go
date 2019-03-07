@@ -19,6 +19,7 @@ var GetFactors = func(responseWriter http.ResponseWriter, request *http.Request)
 	// Execute the SQL query to take all surveys and set it's result to the variable called "firstQuery".
 	firstQuery, err := database.DBSQL.Query("SELECT * FROM factors;")
 	if err != nil {
+		log.Println(err)
 		return
 	}
 
@@ -33,7 +34,7 @@ var GetFactors = func(responseWriter http.ResponseWriter, request *http.Request)
 		// Call "Scan()" function on the result set of the first SQL query.
 		if err := firstQuery.Scan(&factor.ID, &factor.Name); err != nil {
 			log.Println(err)
-			continue
+			return
 		}
 
 		// Make SQL query to take information about all questions of the specific survey and set it's result to the variable called "secondQuery".
@@ -45,6 +46,7 @@ var GetFactors = func(responseWriter http.ResponseWriter, request *http.Request)
 		ON factors_questions.question_id = questions.id
 		WHERE factors_questions.factor_id = $1;`, factor.ID)
 		if err != nil {
+			log.Println(err)
 			return
 		}
 
@@ -55,7 +57,8 @@ var GetFactors = func(responseWriter http.ResponseWriter, request *http.Request)
 
 			// Call "Scan()" function on the result set of the second SQL query.
 			if err := secondQuery.Scan(&question.ID, &question.Text); err != nil {
-				continue
+				log.Println(err)
+				return
 			}
 
 			// Initialize the variable called "widget" and assign an "Widget" struct to the variable.
@@ -73,6 +76,7 @@ var GetFactors = func(responseWriter http.ResponseWriter, request *http.Request)
 			// Call "Scan()" function on the result of the third SQL query.
 			err = thirdQuery.Scan(&widget.ID, &widget.Name)
 			if err != nil {
+				log.Println(err)
 				return
 			}
 
@@ -88,6 +92,7 @@ var GetFactors = func(responseWriter http.ResponseWriter, request *http.Request)
 			ON questions_options.option_id = options.id
 			WHERE questions_options.question_id = $1;`, question.ID)
 			if err != nil {
+				log.Println(err)
 				return
 			}
 
@@ -99,6 +104,7 @@ var GetFactors = func(responseWriter http.ResponseWriter, request *http.Request)
 				// Call "Scan()" function on the result set of the fourth SQL query.
 				if err := fourthSQL.Scan(&option.ID, &option.Text); err != nil {
 					log.Println(err)
+					return
 				}
 
 				// Set the information about all options of specific question to the "Options" field of the struct "Question".
@@ -178,6 +184,7 @@ var GetFactor = func(responseWriter http.ResponseWriter, request *http.Request) 
 		ON factors_questions.question_id = questions.id
 		WHERE factors_questions.factor_id = $1;`, factorID)
 	if err != nil {
+		log.Println(err)
 		return
 	}
 
@@ -188,7 +195,8 @@ var GetFactor = func(responseWriter http.ResponseWriter, request *http.Request) 
 
 		// Call "Scan()" function on the result set of the second SQL query.
 		if err := firstQuery.Scan(&question.ID, &question.Text); err != nil {
-			continue
+			log.Println(err)
+			return
 		}
 
 		// Initialize the variable called "widget" and assign an "Widget" struct to the variable.
@@ -206,6 +214,7 @@ var GetFactor = func(responseWriter http.ResponseWriter, request *http.Request) 
 		// Call "Scan()" function on the result of the second SQL query.
 		err = secondQuery.Scan(&widget.ID, &widget.Name)
 		if err != nil {
+			log.Println(err)
 			return
 		}
 
@@ -221,6 +230,7 @@ var GetFactor = func(responseWriter http.ResponseWriter, request *http.Request) 
 		ON questions_options.option_id = options.id
 		WHERE questions_options.question_id = $1;`, question.ID)
 		if err != nil {
+			log.Println(err)
 			return
 		}
 
@@ -232,6 +242,7 @@ var GetFactor = func(responseWriter http.ResponseWriter, request *http.Request) 
 			// Call "Scan()" function on the result set of the third SQL query.
 			if err := thirdSQL.Scan(&option.ID, &option.Text); err != nil {
 				log.Println(err)
+				return
 			}
 
 			// Set the information about all options of specific question to the "Options" field of the struct "Question".
