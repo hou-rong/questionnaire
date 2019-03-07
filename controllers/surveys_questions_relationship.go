@@ -9,13 +9,13 @@ import (
 	"questionnaire/utils"
 )
 
-var DeleteSurveysFactorsRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+var DeleteSurveysQuestionsRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
 	// Take query parameters with the help of "mux.Vars" function.
 	vars := mux.Vars(request)
 	surveyID := vars["survey_id"]
 
 	// Delete all records from "surveys_factors" table for the specific survey.
-	if _, err := database.DBSQL.Exec("DELETE FROM surveys_factors WHERE survey_id = $1;", surveyID); err != nil {
+	if _, err := database.DBSQL.Exec("DELETE FROM surveys_questions WHERE survey_id = $1;", surveyID); err != nil {
 		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
@@ -25,13 +25,13 @@ var DeleteSurveysFactorsRelationship = func(responseWriter http.ResponseWriter, 
 	utils.ResponseWithSuccess(responseWriter, http.StatusOK, "The records successfully deleted.")
 }
 
-var CreateSurveysFactorsRelationship  = func(responseWriter http.ResponseWriter, request *http.Request) {
+var CreateSurveysQuestionsRelationship  = func(responseWriter http.ResponseWriter, request *http.Request) {
 	// Take query parameters with the help of "mux.Vars" function.
 	vars := mux.Vars(request)
 	surveyID := vars["survey_id"]
 
 	type Result struct {
-		Factors []int `json:"factors"`
+		Questions []int `json:"questions"`
 	}
 
 	// Initialize the variable called "result" and assign "Result" struct to the variable.
@@ -48,9 +48,9 @@ var CreateSurveysFactorsRelationship  = func(responseWriter http.ResponseWriter,
 	}
 
 	// Parse the array which was send in JSON body from frontend side.
-	for i := 0; i < len(result.Factors); i++ {
+	for i := 0; i < len(result.Questions); i++ {
 		// Execute the SQL query to create new record in the "surveys_factors" table.
-		if _, err := database.DBSQL.Exec("INSERT INTO surveys_factors (survey_id, factor_id) VALUES ($1, $2);", surveyID, result.Factors[i]); err != nil {
+		if _, err := database.DBSQL.Exec("INSERT INTO surveys_questions (survey_id, question_id) VALUES ($1, $2);", surveyID, result.Questions[i]); err != nil {
 			log.Println(err)
 			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 			return
