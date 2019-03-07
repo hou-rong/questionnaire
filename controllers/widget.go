@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
+	"log"
 	"net/http"
 	"questionnaire/database"
 	"questionnaire/models"
@@ -31,7 +32,7 @@ var CreateWidget = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// Decode reads the next JSON-encoded value from its input and stores it in the value pointed to by "&widget".
 	if err := decoder.Decode(&widget); err != nil {
-		// Send response with detailed information about the error if the above process was unsuccessful.
+		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -41,7 +42,7 @@ var CreateWidget = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// Save new record to the "widgets" table with the help of "gorm" package.
 	if err := database.DBGORM.Save(&widget).Error; err != nil {
-		// Send response with detailed information about the error if the above process was unsuccessful.
+		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -58,6 +59,7 @@ var GetWidget = func(responseWriter http.ResponseWriter, request *http.Request) 
 	widgetID, err := strconv.Atoi(vars["widget_id"])
 	// Send response with detailed information about the error if the above process was unsuccessful.
 	if err != nil {
+		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, "The request parameter is invalid.")
 		return
 	}
@@ -80,6 +82,7 @@ var UpdateWidget = func(responseWriter http.ResponseWriter, request *http.Reques
 	widgetID, err := strconv.Atoi(vars["widget_id"])
 	// Send response with detailed information about the error if the above process was unsuccessful.
 	if err != nil {
+		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, "The request parameter is invalid.")
 		return
 	}
@@ -95,7 +98,7 @@ var UpdateWidget = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// Decode reads the next JSON-encoded value from its input and stores it in the value pointed to by "&widget".
 	if err := decoder.Decode(&widget); err != nil {
-		// Send response with detailed information about the error if the above process was unsuccessful.
+		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -105,7 +108,7 @@ var UpdateWidget = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// Save record with new information to the "widgets" table with the help of "gorm" package.
 	if err := database.DBGORM.Save(&widget).Error; err != nil {
-		// Send response with detailed information about the error if the above process was unsuccessful.
+		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -122,6 +125,7 @@ var DeleteWidget = func(responseWriter http.ResponseWriter, request *http.Reques
 	widgetID, err := strconv.Atoi(vars["widget_id"])
 	// Send response with detailed information about the error if the above process was unsuccessful.
 	if err != nil {
+		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, "The request parameter is invalid.")
 		return
 	}
@@ -134,7 +138,7 @@ var DeleteWidget = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// Delete the record from the "widget" table with the help of "gorm" package.
 	if err := database.DBGORM.Delete(&widget).Error; err != nil {
-		// Send response with detailed information about the error if the above process was unsuccessful.
+		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -149,7 +153,7 @@ func GetWidgetOr404(db *gorm.DB, widgetID int, responseWriter http.ResponseWrite
 
 	// Find the widget by id number.
 	if err := db.First(&widget, models.Widget{ID: widgetID}).Error; err != nil {
-		// Send response with error message if the above process was unsuccessful.
+		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusNotFound, "Record not found.")
 		return nil
 	}

@@ -20,6 +20,7 @@ var GetFactors = func(responseWriter http.ResponseWriter, request *http.Request)
 	firstQuery, err := database.DBSQL.Query("SELECT * FROM factors;")
 	if err != nil {
 		log.Println(err)
+		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -34,6 +35,7 @@ var GetFactors = func(responseWriter http.ResponseWriter, request *http.Request)
 		// Call "Scan()" function on the result set of the first SQL query.
 		if err := firstQuery.Scan(&factor.ID, &factor.Name); err != nil {
 			log.Println(err)
+			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 			return
 		}
 
@@ -47,6 +49,7 @@ var GetFactors = func(responseWriter http.ResponseWriter, request *http.Request)
 		WHERE factors_questions.factor_id = $1;`, factor.ID)
 		if err != nil {
 			log.Println(err)
+			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 			return
 		}
 
@@ -58,6 +61,7 @@ var GetFactors = func(responseWriter http.ResponseWriter, request *http.Request)
 			// Call "Scan()" function on the result set of the second SQL query.
 			if err := secondQuery.Scan(&question.ID, &question.Text); err != nil {
 				log.Println(err)
+				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
 
@@ -77,6 +81,7 @@ var GetFactors = func(responseWriter http.ResponseWriter, request *http.Request)
 			err = thirdQuery.Scan(&widget.ID, &widget.Name)
 			if err != nil {
 				log.Println(err)
+				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
 
@@ -93,6 +98,7 @@ var GetFactors = func(responseWriter http.ResponseWriter, request *http.Request)
 			WHERE questions_options.question_id = $1;`, question.ID)
 			if err != nil {
 				log.Println(err)
+				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
 
@@ -104,6 +110,7 @@ var GetFactors = func(responseWriter http.ResponseWriter, request *http.Request)
 				// Call "Scan()" function on the result set of the fourth SQL query.
 				if err := fourthSQL.Scan(&option.ID, &option.Text); err != nil {
 					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 
@@ -138,7 +145,7 @@ var CreateFactor = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// Decode reads the next JSON-encoded value from its input and stores it in the value pointed to by "&factor".
 	if err := decoder.Decode(&factor); err != nil {
-		// Send response with detailed information about the error if the above process was unsuccessful.
+		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -148,7 +155,7 @@ var CreateFactor = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// Save new record to the "factors" table with the help of "gorm" package.
 	if err := database.DBGORM.Save(&factor).Error; err != nil {
-		// Send response with detailed information about the error if the above process was unsuccessful.
+		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -165,6 +172,7 @@ var GetFactor = func(responseWriter http.ResponseWriter, request *http.Request) 
 	factorID, err := strconv.Atoi(vars["factor_id"])
 	// Send response with detailed information about the error if the above process was unsuccessful.
 	if err != nil {
+		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, "The request parameter is invalid.")
 		return
 	}
@@ -185,6 +193,7 @@ var GetFactor = func(responseWriter http.ResponseWriter, request *http.Request) 
 		WHERE factors_questions.factor_id = $1;`, factorID)
 	if err != nil {
 		log.Println(err)
+		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -196,6 +205,7 @@ var GetFactor = func(responseWriter http.ResponseWriter, request *http.Request) 
 		// Call "Scan()" function on the result set of the second SQL query.
 		if err := firstQuery.Scan(&question.ID, &question.Text); err != nil {
 			log.Println(err)
+			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 			return
 		}
 
@@ -215,6 +225,7 @@ var GetFactor = func(responseWriter http.ResponseWriter, request *http.Request) 
 		err = secondQuery.Scan(&widget.ID, &widget.Name)
 		if err != nil {
 			log.Println(err)
+			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 			return
 		}
 
@@ -231,6 +242,7 @@ var GetFactor = func(responseWriter http.ResponseWriter, request *http.Request) 
 		WHERE questions_options.question_id = $1;`, question.ID)
 		if err != nil {
 			log.Println(err)
+			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 			return
 		}
 
@@ -242,6 +254,7 @@ var GetFactor = func(responseWriter http.ResponseWriter, request *http.Request) 
 			// Call "Scan()" function on the result set of the third SQL query.
 			if err := thirdSQL.Scan(&option.ID, &option.Text); err != nil {
 				log.Println(err)
+				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
 
@@ -271,6 +284,7 @@ var UpdateFactor = func(responseWriter http.ResponseWriter, request *http.Reques
 	factorID, err := strconv.Atoi(vars["factor_id"])
 	// Send response with detailed information about the error if the above process was unsuccessful.
 	if err != nil {
+		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, "The request parameter is invalid.")
 		return
 	}
@@ -286,6 +300,7 @@ var UpdateFactor = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// Decode reads the next JSON-encoded value from its input and stores it in the value pointed to by "&factor".
 	if err := decoder.Decode(&factor); err != nil {
+		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -295,6 +310,7 @@ var UpdateFactor = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// Save record with new information to the "factors" table with the help of "gorm" package.
 	if err := database.DBGORM.Save(&factor).Error; err != nil {
+		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -311,6 +327,7 @@ var DeleteFactor = func(responseWriter http.ResponseWriter, request *http.Reques
 	factorID, err := strconv.Atoi(vars["factor_id"])
 	// Send response with detailed information about the error if the above process was unsuccessful.
 	if err != nil {
+		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, "The request parameter is invalid.")
 		return
 	}
@@ -323,6 +340,7 @@ var DeleteFactor = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// Delete the record from the "factor" table with the help of "gorm" package.
 	if err := database.DBGORM.Delete(&factor).Error; err != nil {
+		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -337,6 +355,7 @@ func GetFactorOr404(db *gorm.DB, factorID int, responseWriter http.ResponseWrite
 
 	// Find the factor by id number.
 	if err := db.First(&factor, models.Factor{ID: factorID}).Error; err != nil {
+		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusNotFound, "Record not found.")
 		return nil
 	}

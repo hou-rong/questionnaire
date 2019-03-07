@@ -17,6 +17,7 @@ var GetQuestions = func(responseWriter http.ResponseWriter, request *http.Reques
 	firstQuery, err := database.DBSQL.Query("SELECT * FROM questions;")
 	if err != nil {
 		log.Println(err)
+		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -34,6 +35,7 @@ var GetQuestions = func(responseWriter http.ResponseWriter, request *http.Reques
 		// Call "Scan()" function on the result set of the first SQL query.
 		if err := firstQuery.Scan(&question.ID, &question.Text); err != nil {
 			log.Println(err)
+			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 			return
 		}
 
@@ -53,6 +55,7 @@ var GetQuestions = func(responseWriter http.ResponseWriter, request *http.Reques
 		err = secondQuery.Scan(&widget.ID, &widget.Name)
 		if err != nil {
 			log.Println(err)
+			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 			return
 		}
 
@@ -69,6 +72,7 @@ var GetQuestions = func(responseWriter http.ResponseWriter, request *http.Reques
 		WHERE questions_options.question_id = $1;`, question.ID)
 		if err != nil {
 			log.Println(err)
+			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 			return
 		}
 
@@ -81,6 +85,7 @@ var GetQuestions = func(responseWriter http.ResponseWriter, request *http.Reques
 			// Call "Scan()" function on the result set of the third SQL query.
 			if err := thirdQuery.Scan(&option.ID, &option.Text); err != nil {
 				log.Println(err)
+				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
 
@@ -108,7 +113,7 @@ var CreateQuestion = func(responseWriter http.ResponseWriter, request *http.Requ
 
 	// Decode reads the next JSON-encoded value from its input and stores it in the value pointed to by "&question".
 	if err := decoder.Decode(&question); err != nil {
-		// Send response with detailed information about the error if the above process was unsuccessful.
+		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -118,7 +123,7 @@ var CreateQuestion = func(responseWriter http.ResponseWriter, request *http.Requ
 
 	// Save new record to the "questions" table with the help of "gorm" package.
 	if err := database.DBGORM.Save(&question).Error; err != nil {
-		// Send response with detailed information about the error if the above process was unsuccessful.
+		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -135,6 +140,7 @@ var GetQuestion = func(responseWriter http.ResponseWriter, request *http.Request
 	questionID, err := strconv.Atoi(vars["question_id"])
 	// Send response with detailed information about the error if the above process was unsuccessful.
 	if err != nil {
+		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, "The request parameter is invalid.")
 		return
 	}
@@ -184,6 +190,7 @@ var GetQuestion = func(responseWriter http.ResponseWriter, request *http.Request
 		// Call "Scan()" function on the result set of the third SQL query.
 		if err := secondQuery.Scan(&option.ID, &option.Text); err != nil {
 			log.Println(err)
+			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 			return
 		}
 
@@ -206,6 +213,7 @@ var UpdateQuestion = func(responseWriter http.ResponseWriter, request *http.Requ
 	questionID, err := strconv.Atoi(vars["question_id"])
 	// Send response with detailed information about the error if the above process was unsuccessful.
 	if err != nil {
+		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, "The request parameter is invalid.")
 		return
 	}
@@ -221,7 +229,7 @@ var UpdateQuestion = func(responseWriter http.ResponseWriter, request *http.Requ
 
 	// Decode reads the next JSON-encoded value from its input and stores it in the value pointed to by "&question".
 	if err := decoder.Decode(&question); err != nil {
-		// Send response with detailed information about the error if the above process was unsuccessful.
+		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -231,7 +239,7 @@ var UpdateQuestion = func(responseWriter http.ResponseWriter, request *http.Requ
 
 	// Save record with new information to the "questions" table with the help of "gorm" package.
 	if err := database.DBGORM.Save(&question).Error; err != nil {
-		// Send response with detailed information about the error if the above process was unsuccessful.
+		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -248,6 +256,7 @@ var DeleteQuestion = func(responseWriter http.ResponseWriter, request *http.Requ
 	questionID, err := strconv.Atoi(vars["question_id"])
 	// Send response with detailed information about the error if the above process was unsuccessful.
 	if err != nil {
+		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, "The request parameter is invalid.")
 		return
 	}
@@ -256,12 +265,13 @@ var DeleteQuestion = func(responseWriter http.ResponseWriter, request *http.Requ
 	question := GetQuestionOr404(database.DBGORM, questionID, responseWriter, request)
 	if question == nil {
 		log.Println(err)
+		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	// Delete the record from the "questions" table with the help of "gorm" package.
 	if err := database.DBGORM.Delete(&question).Error; err != nil {
-		// Send response with detailed information about the error if the above process was unsuccessful.
+		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -276,6 +286,7 @@ func GetQuestionOr404(db *gorm.DB, questionID int, responseWriter http.ResponseW
 
 	// Find the question by id number.
 	if err := db.First(&question, models.Question{ID: questionID}).Error; err != nil {
+		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusNotFound, "Record not found.")
 		return nil
 	}
