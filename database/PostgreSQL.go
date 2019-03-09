@@ -8,7 +8,7 @@ import (
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"log"
-	"restify/utils"
+	"questionnaire/utils"
 )
 
 var DBSQL *sql.DB
@@ -20,9 +20,9 @@ Function name:
 "ConnectPostgreSQL"
 
 Function description:
-The main task of the function is to check the connection to remote PostgreSQL database with the help of "database/sql" package.
+The main task of the function is to check the connection to remote PostgreSQL database with the help of "gorm" and "database/sql" package.
 */
-func ConnectPostgreSQL() () {
+func ConnectPostgreSQL() {
 	// The application load environment variables from the ".env" file.
 	err := godotenv.Load(".env")
 	// If the ".env" file is not available the application will show an error message.

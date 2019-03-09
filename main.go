@@ -24,6 +24,10 @@ func main()  {
 	defer database.SQLDisconnectPostgreSQL()
 	defer database.GORMDisconnectPostgreSQL()
 
+	// The application check the connection to remote Oracle database with the help of "database/sql" packages.
+	database.ConnectOracle()
+	defer database.DisconnectOracle()
+
 	// The application create the "Gorilla Mux" router.
 	router := mux.NewRouter()
 
