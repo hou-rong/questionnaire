@@ -15,7 +15,6 @@
 
 Instruction to cross compile Golang application with CGO packages from `windows/x64` to `linux/amd64`:
 - Install [tdm-gcc](http://tdm-gcc.tdragon.net/download). A compiler suite for 32- and 64-bit Windows based on the GNU toolchain.
-- Create environment variable. Key: `GCC`. Value: `C:\TDM-GCC-64`.
 - In `POWERSHELL` execute commands:
   ```
   set GOOS=linux
