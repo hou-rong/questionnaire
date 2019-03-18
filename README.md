@@ -56,7 +56,7 @@ SELECT setval('questions_id_seq', (SELECT MAX(id) FROM options) + 1);
 
 Inside `build.sh` file you can notice the instruction which you can use to create the `docker image`:
 ```
-docker build -t saturn_backend_image .
+docker build -t questionnaire_image .
 ```
 
 `Dockerfile`:
