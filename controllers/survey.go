@@ -11,9 +11,9 @@ import (
 	"questionnaire/utils"
 )
 
-var GetSurveys = func(responseWriter http.ResponseWriter, request *http.Request) {
+var GetExtendedSurveys = func(responseWriter http.ResponseWriter, request *http.Request) {
 	// Initialize the variable called "surveys" and assign an array to the variable.
-	var surveys []models.Survey
+	var surveys []models.ExtendedSurvey
 
 	// Execute the SQL query to take all surveys and set it's result to the variable called "firstQuery".
 	firstQuery, err := database.DBSQL.Query("SELECT * FROM surveys;")
@@ -29,7 +29,7 @@ var GetSurveys = func(responseWriter http.ResponseWriter, request *http.Request)
 	// Parse the result set of the first SQL query.
 	for firstQuery.Next() {
 		// Initialize the variable called "survey" and assign an "Survey" struct to the variable.
-		var survey models.Survey
+		var survey models.ExtendedSurvey
 
 		// Call "Scan()" function on the result set of the first SQL query.
 		if err := firstQuery.Scan(&survey.ID, &survey.Name, &survey.Description, &survey.Status, &survey.StartPeriod, &survey.EndPeriod); err != nil {
@@ -135,9 +135,114 @@ var GetSurveys = func(responseWriter http.ResponseWriter, request *http.Request)
 	utils.Response(responseWriter, http.StatusOK, surveys)
 }
 
+var GetAbridgedSurveys = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Initialize the variable called "surveys" and assign an array to the variable.
+	var surveys []models.AbridgedSurvey
+
+	// Execute the SQL query to take all surveys and set it's result to the variable called "rows".
+	rows, err := database.DBSQL.Query("SELECT ID, NAME FROM surveys;")
+	if err != nil {
+		log.Println(err)
+		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// Call "Close" function.
+	defer rows.Close()
+
+	// Parse the result set of the SQL query.
+	for rows.Next() {
+		// Initialize the variable called "survey" and assign an "Survey" struct to the variable.
+		var survey models.AbridgedSurvey
+
+		// Call "Scan()" function on the result set of the SQL query.
+		if err := rows.Scan(&survey.ID, &survey.Name); err != nil {
+			log.Println(err)
+			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		// Set all surveys to the final array.
+		surveys = append(surveys, survey)
+	}
+
+	// Send successful response with status code "200" and JSON.
+	utils.Response(responseWriter, http.StatusOK, surveys)
+}
+
+var GetAbridgedActiveSurveys = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Initialize the variable called "surveys" and assign an array to the variable.
+	var surveys []models.AbridgedSurvey
+
+	// Execute the SQL query to take all surveys and set it's result to the variable called "rows".
+	rows, err := database.DBSQL.Query("SELECT ID, NAME FROM surveys WHERE STATUS = TRUE;")
+	if err != nil {
+		log.Println(err)
+		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// Call "Close" function.
+	defer rows.Close()
+
+	// Parse the result set of the SQL query.
+	for rows.Next() {
+		// Initialize the variable called "survey" and assign an "Survey" struct to the variable.
+		var survey models.AbridgedSurvey
+
+		// Call "Scan()" function on the result set of the SQL query.
+		if err := rows.Scan(&survey.ID, &survey.Name); err != nil {
+			log.Println(err)
+			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		// Set all surveys to the final array.
+		surveys = append(surveys, survey)
+	}
+
+	// Send successful response with status code "200" and JSON.
+	utils.Response(responseWriter, http.StatusOK, surveys)
+}
+
+var GetAbridgedInactiveSurveys = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Initialize the variable called "surveys" and assign an array to the variable.
+	var surveys []models.AbridgedSurvey
+
+	// Execute the SQL query to take all surveys and set it's result to the variable called "rows".
+	rows, err := database.DBSQL.Query("SELECT ID, NAME FROM surveys WHERE STATUS = FALSE;")
+	if err != nil {
+		log.Println(err)
+		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// Call "Close" function.
+	defer rows.Close()
+
+	// Parse the result set of the SQL query.
+	for rows.Next() {
+		// Initialize the variable called "survey" and assign an "Survey" struct to the variable.
+		var survey models.AbridgedSurvey
+
+		// Call "Scan()" function on the result set of the SQL query.
+		if err := rows.Scan(&survey.ID, &survey.Name); err != nil {
+			log.Println(err)
+			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		// Set all surveys to the final array.
+		surveys = append(surveys, survey)
+	}
+
+	// Send successful response with status code "200" and JSON.
+	utils.Response(responseWriter, http.StatusOK, surveys)
+}
+
 var CreateSurvey = func(responseWriter http.ResponseWriter, request *http.Request) {
 	// Initialize the variable called "survey" and assign struct to the variable.
-	survey := models.Survey{}
+	survey := models.ExtendedSurvey{}
 
 	// NewDecoder returns a new decoder that reads from request body.
 	decoder := json.NewDecoder(request.Body)
@@ -160,7 +265,7 @@ var CreateSurvey = func(responseWriter http.ResponseWriter, request *http.Reques
 	}
 
 	// Send successful response with status code "201" and message.
-	utils.ResponseWithSuccess(responseWriter, http.StatusCreated, "The new entry successfully created.")
+	utils.ResponseWithSuccess(responseWriter, http.StatusCreated, survey.ID)
 }
 
 var GetSurvey = func(responseWriter http.ResponseWriter, request *http.Request) {
@@ -326,12 +431,12 @@ var DeleteSurvey = func(responseWriter http.ResponseWriter, request *http.Reques
 	utils.ResponseWithSuccess(responseWriter, http.StatusOK, "The entry successfully deleted.")
 }
 
-func GetSurveyOr404(db *gorm.DB, surveyID string, responseWriter http.ResponseWriter, request *http.Request) *models.Survey {
+func GetSurveyOr404(db *gorm.DB, surveyID string, responseWriter http.ResponseWriter, request *http.Request) *models.ExtendedSurvey {
 	// Initialize the variable called "survey" and assign an struct to the variable.
-	survey := models.Survey{}
+	survey := models.ExtendedSurvey{}
 
 	// Find the survey by id number which is uuid4.
-	if err := db.First(&survey, models.Survey{ID: surveyID}).Error; err != nil {
+	if err := db.First(&survey, models.ExtendedSurvey{ID: surveyID}).Error; err != nil {
 		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusNotFound, "Record not found.")
 		return nil

@@ -40,6 +40,7 @@ A. *Category «Factors»*
 
 Set `Content-Type` as `application/json` in `POST` and `PUT` requests. In the body of these requests send JSON object with information about the specific factor.
 
+List of all available routes of the project you can see in `routes/routes.go` file. 
 
 # Database Details
 

@@ -38,7 +38,10 @@ func Handle(router *mux.Router) {
 	router.HandleFunc("/api/question/{question_id:[0-9]+}", controllers.DeleteQuestion).Methods("DELETE")
 	router.HandleFunc("/api/question/{question_id:[0-9]+}", controllers.UpdateQuestion).Methods("PUT")
 
-	router.HandleFunc("/api/surveys", controllers.GetSurveys).Methods("GET")
+	router.HandleFunc("/api/extended_surveys", controllers.GetExtendedSurveys).Methods("GET")
+	router.HandleFunc("/api/abridged_surveys", controllers.GetAbridgedSurveys).Methods("GET")
+	router.HandleFunc("/api/abridged_surveys/active", controllers.GetAbridgedActiveSurveys).Methods("GET")
+	router.HandleFunc("/api/abridged_surveys/inactive", controllers.GetAbridgedInactiveSurveys).Methods("GET")
 	router.HandleFunc("/api/survey", controllers.CreateSurvey).Methods("POST")
 	router.HandleFunc("/api/survey/{survey_id:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}}", controllers.GetSurvey).Methods("GET")
 	router.HandleFunc("/api/survey/{survey_id:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}}", controllers.DeleteSurvey).Methods("DELETE")
@@ -51,5 +54,6 @@ func Handle(router *mux.Router) {
 	router.HandleFunc("/api/surveys_questions_relationship/{survey_id:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}}", controllers.CreateSurveysQuestionsRelationship).Methods("POST")
 
 	router.HandleFunc("/api/employees", controllers.GetEmployees).Methods("GET")
+	router.HandleFunc("/api/employee/{email}", controllers.GetEmployee).Methods("GET")
 	router.HandleFunc("/api/organizations", controllers.GetOrganizations).Methods("GET")
 }

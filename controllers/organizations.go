@@ -17,7 +17,7 @@ var GetOrganizations = func(responseWriter http.ResponseWriter, request *http.Re
        	ORGANIZATION_RANG,
        	PARENT_ORGANIZATION_ID
 	FROM
-	    DMP_ORG_STR
+	    NFS_DIM_ORG_STR
 	WHERE
 	    ORGANIZATION_NAME IS NOT NULL
 	ORDER BY
