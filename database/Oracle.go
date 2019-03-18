@@ -38,7 +38,7 @@ func ConnectOracle() {
 	databaseURL:= fmt.Sprintf("%s/%s@%s:%s/%s", databaseUser, databasePassword, databaseHost, databasePort, databaseName)
 
 	// The application create connection pool to remote Oracle database with the help of the "database/sql" package.
-	OracleDB, err := sql.Open("goracle", databaseURL)
+	OracleDB, err = sql.Open("goracle", databaseURL)
 	// If connection pool creation process was unsuccessful the application show an error message.
 	if err != nil {
 		log.Println(err)
@@ -53,7 +53,7 @@ func ConnectOracle() {
 		panic(err)
 	}
 
-	log.Println("RESTful web service successfully connected to remote ORACLE database with the help of \"database/sql\" package.")
+	log.Println("RESTful web service successfully connected to remote ORACLE database with the help of \"gopkg.in/goracle.v2\" package.")
 }
 
 /*

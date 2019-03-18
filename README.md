@@ -108,7 +108,7 @@ CMD ["./questionnaire"]
 
 Inside `run.sh` file you can notice the instruction which you can use to create the `docker container`:
 ```
-sudo docker run --name questionnaire_container -d -p 9019:8000 questionnaire_image
+sudo docker run --name questionnaire_container -d -p 1000:8000 questionnaire_image
 ```
 
 # License
