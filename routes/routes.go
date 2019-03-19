@@ -58,4 +58,7 @@ func Handle(router *mux.Router) {
 	router.HandleFunc("/api/employee/{email}", controllers.GetEmployee).Methods("GET")
 	router.HandleFunc("/api/organization_employees", controllers.GetOrganizationEmployees).Methods("GET")
 	router.HandleFunc("/api/organizations", controllers.GetOrganizations).Methods("GET")
+
+	router.HandleFunc("/api/surveys_employees_relationship/{survey_id:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}}", controllers.DeleteSurveysEmployeesRelationship).Methods("DELETE")
+	router.HandleFunc("/api/surveys_employees_relationship/{survey_id:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}}", controllers.CreateSurveysEmployeesRelationship).Methods("POST")
 }

@@ -30,27 +30,27 @@ var CreateSurveysQuestionsRelationship  = func(responseWriter http.ResponseWrite
 	vars := mux.Vars(request)
 	surveyID := vars["survey_id"]
 
-	type Result struct {
+	type RequestBody struct {
 		Questions []int `json:"questions"`
 	}
 
-	// Initialize the variable called "result" and assign "Result" struct to the variable.
-	result := Result{}
+	// Initialize the variable called "requestBody" and assign "RequestBody" struct to the variable.
+	requestBody := RequestBody{}
 
 	// NewDecoder returns a new decoder that reads from request body.
 	decoder := json.NewDecoder(request.Body)
 
 	// Decode reads the next JSON-encoded value from its input and stores it in the value pointed to by "&result".
-	if err := decoder.Decode(&result); err != nil {
+	if err := decoder.Decode(&requestBody); err != nil {
 		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	// Parse the array which was send in JSON body from frontend side.
-	for i := 0; i < len(result.Questions); i++ {
+	for i := 0; i < len(requestBody.Questions); i++ {
 		// Execute the SQL query to create new record in the "surveys_factors" table.
-		if _, err := database.DBSQL.Exec("INSERT INTO surveys_questions (survey_id, question_id) VALUES ($1, $2);", surveyID, result.Questions[i]); err != nil {
+		if _, err := database.DBSQL.Exec("INSERT INTO surveys_questions (survey_id, question_id) VALUES ($1, $2);", surveyID, requestBody.Questions[i]); err != nil {
 			log.Println(err)
 			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 			return

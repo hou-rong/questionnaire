@@ -9,13 +9,13 @@ import (
 	"questionnaire/utils"
 )
 
-var DeleteSurveysFactorsRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+var DeleteSurveysEmployeesRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
 	// Take query parameters with the help of "mux.Vars" function.
 	vars := mux.Vars(request)
 	surveyID := vars["survey_id"]
 
-	// Delete all records from "surveys_factors" table for the specific survey.
-	if _, err := database.DBSQL.Exec("DELETE FROM surveys_factors WHERE survey_id = $1;", surveyID); err != nil {
+	// Delete all records from "surveys_employees" table for the specific survey.
+	if _, err := database.DBSQL.Exec("DELETE FROM surveys_employees WHERE survey_id = $1;", surveyID); err != nil {
 		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
@@ -25,13 +25,13 @@ var DeleteSurveysFactorsRelationship = func(responseWriter http.ResponseWriter, 
 	utils.ResponseWithSuccess(responseWriter, http.StatusOK, "The records successfully deleted.")
 }
 
-var CreateSurveysFactorsRelationship  = func(responseWriter http.ResponseWriter, request *http.Request) {
+var CreateSurveysEmployeesRelationship  = func(responseWriter http.ResponseWriter, request *http.Request) {
 	// Take query parameters with the help of "mux.Vars" function.
 	vars := mux.Vars(request)
 	surveyID := vars["survey_id"]
 
 	type RequestBody struct {
-		Factors []int `json:"factors"`
+		Employees []string `json:"employees"`
 	}
 
 	// Initialize the variable called "requestBody" and assign "RequestBody" struct to the variable.
@@ -48,9 +48,9 @@ var CreateSurveysFactorsRelationship  = func(responseWriter http.ResponseWriter,
 	}
 
 	// Parse the array which was send in JSON body from frontend side.
-	for i := 0; i < len(requestBody.Factors); i++ {
+	for i := 0; i < len(requestBody.Employees); i++ {
 		// Execute the SQL query to create new record in the "surveys_factors" table.
-		if _, err := database.DBSQL.Exec("INSERT INTO surveys_factors (survey_id, factor_id) VALUES ($1, $2);", surveyID, requestBody.Factors[i]); err != nil {
+		if _, err := database.DBSQL.Exec("INSERT INTO surveys_employees (survey_id, email) VALUES ($1, $2);", surveyID, requestBody.Employees[i]); err != nil {
 			log.Println(err)
 			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 			return
