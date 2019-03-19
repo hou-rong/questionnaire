@@ -55,5 +55,6 @@ func Handle(router *mux.Router) {
 
 	router.HandleFunc("/api/employees", controllers.GetEmployees).Methods("GET")
 	router.HandleFunc("/api/employee/{email}", controllers.GetEmployee).Methods("GET")
+	router.HandleFunc("/api/organization_employees", controllers.GetOrganizationEmployees).Methods("GET")
 	router.HandleFunc("/api/organizations", controllers.GetOrganizations).Methods("GET")
 }
