@@ -14,7 +14,8 @@ The function provides a list of all available URLs which would use RESTful web s
 */
 
 func Handle(router *mux.Router) {
-	router.HandleFunc("/api/factors", controllers.GetFactors).Methods("GET")
+	router.HandleFunc("/api/extended_factors", controllers.GetExtendedFactors).Methods("GET")
+	router.HandleFunc("/api/abridged_factors", controllers.GetAbridgedFactors).Methods("GET")
 	router.HandleFunc("/api/factor", controllers.CreateFactor).Methods("POST")
 	router.HandleFunc("/api/factor/{factor_id:[0-9]+}", controllers.GetFactor).Methods("GET")
 	router.HandleFunc("/api/factor/{factor_id:[0-9]+}", controllers.DeleteFactor).Methods("DELETE")

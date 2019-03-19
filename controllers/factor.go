@@ -12,9 +12,9 @@ import (
 	"strconv"
 )
 
-var GetFactors = func(responseWriter http.ResponseWriter, request *http.Request) {
+var GetExtendedFactors = func(responseWriter http.ResponseWriter, request *http.Request) {
 	// Initialize the variable called "factors" and assign an array to the variable.
-	var factors []models.Factor
+	var factors []models.ExtendedFactor
 
 	// Execute the SQL query to take all surveys and set it's result to the variable called "firstQuery".
 	firstQuery, err := database.DBSQL.Query("SELECT * FROM factors;")
@@ -30,7 +30,7 @@ var GetFactors = func(responseWriter http.ResponseWriter, request *http.Request)
 	// Parse the result set of the first SQL query.
 	for firstQuery.Next() {
 		// Initialize the variable called "factor" and assign an "Factor" struct to the variable.
-		var factor models.Factor
+		var factor models.ExtendedFactor
 
 		// Call "Scan()" function on the result set of the first SQL query.
 		if err := firstQuery.Scan(&factor.ID, &factor.Name); err != nil {
@@ -128,7 +128,42 @@ var GetFactors = func(responseWriter http.ResponseWriter, request *http.Request)
 		// Call "Close" function.
 		secondQuery.Close()
 
-		// Set all surveys to the final array.
+		// Set all factors to the final array.
+		factors = append(factors, factor)
+	}
+
+	// Send successful response with status code "200" and JSON.
+	utils.Response(responseWriter, http.StatusOK, factors)
+}
+
+var GetAbridgedFactors = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Initialize the variable called "factors" and assign an array to the variable.
+	var factors []models.AbridgedFactor
+
+	// Execute the SQL query to take all factors and set it's result to the variable called "rows".
+	rows, err := database.DBSQL.Query("SELECT * FROM factors;")
+	if err != nil {
+		log.Println(err)
+		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// Call "Close" function.
+	defer rows.Close()
+
+	// Parse the result set of the first SQL query.
+	for rows.Next() {
+		// Initialize the variable called "factor" and assign an "Factor" struct to the variable.
+		var factor models.AbridgedFactor
+
+		// Call "Scan()" function on the result set of the first SQL query.
+		if err := rows.Scan(&factor.ID, &factor.Name); err != nil {
+			log.Println(err)
+			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		// Set all factors to the final array.
 		factors = append(factors, factor)
 	}
 
@@ -138,7 +173,7 @@ var GetFactors = func(responseWriter http.ResponseWriter, request *http.Request)
 
 var CreateFactor = func(responseWriter http.ResponseWriter, request *http.Request) {
 	// Initialize the variable called "factor" and assign struct to the variable.
-	factor := models.Factor{}
+	factor := models.ExtendedFactor{}
 
 	// NewDecoder returns a new decoder that reads from request body.
 	decoder := json.NewDecoder(request.Body)
@@ -161,7 +196,7 @@ var CreateFactor = func(responseWriter http.ResponseWriter, request *http.Reques
 	}
 
 	// Send successful response with status code "201" and message.
-	utils.ResponseWithSuccess(responseWriter, http.StatusCreated, "The new entry successfully created.")
+	utils.ResponseWithSuccess(responseWriter, http.StatusCreated, strconv.Itoa(factor.ID))
 }
 
 var GetFactor = func(responseWriter http.ResponseWriter, request *http.Request) {
@@ -349,12 +384,12 @@ var DeleteFactor = func(responseWriter http.ResponseWriter, request *http.Reques
 	utils.ResponseWithSuccess(responseWriter, http.StatusOK, "The entry successfully deleted.")
 }
 
-func GetFactorOr404(db *gorm.DB, factorID int, responseWriter http.ResponseWriter, request *http.Request) *models.Factor {
+func GetFactorOr404(db *gorm.DB, factorID int, responseWriter http.ResponseWriter, request *http.Request) *models.ExtendedFactor {
 	// Initialize the variable called "factor" and assign an struct to the variable.
-	factor := models.Factor{}
+	factor := models.ExtendedFactor{}
 
 	// Find the factor by id number.
-	if err := db.First(&factor, models.Factor{ID: factorID}).Error; err != nil {
+	if err := db.First(&factor, models.ExtendedFactor{ID: factorID}).Error; err != nil {
 		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusNotFound, "Record not found.")
 		return nil
