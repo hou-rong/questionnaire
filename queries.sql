@@ -259,3 +259,45 @@ CREATE TABLE TEMPLATES (
   ID SERIAL NOT NULL PRIMARY KEY,
   TEMPLATE TEXT NOT NULL
 );
+
+/*
+ * Удалить из таблицы "SURVEYS_FACTORS_RELATIONSHIP" constraint.
+ */
+ALTER TABLE SURVEYS_FACTORS_RELATIONSHIP DROP CONSTRAINT surveys_factors_relationship_survey_id_fkey;
+
+/*
+ * Добавить первичный ключ в таблицу "SURVEYS_FACTORS_RELATIONSHIP" с каскадным удалением.
+ */
+ALTER TABLE SURVEYS_FACTORS_RELATIONSHIP
+ADD CONSTRAINT surveys_factors_relationship_survey_id_fkey
+FOREIGN KEY (SURVEY_ID)
+REFERENCES SURVEYS(ID)
+ON DELETE CASCADE;
+
+/*
+ * Удалить из таблицы "SURVEYS_ORGANIZATIONS_RELATIONSHIP" constraint.
+ */
+ALTER TABLE SURVEYS_ORGANIZATIONS_RELATIONSHIP DROP CONSTRAINT surveys_organizations_relationship_survey_id_fkey;
+
+/*
+ * Добавить первичный ключ в таблицу "SURVEYS_ORGANIZATIONS_RELATIONSHIP" с каскадным удалением.
+ */
+ALTER TABLE SURVEYS_ORGANIZATIONS_RELATIONSHIP
+ADD CONSTRAINT surveys_organizations_relationship_survey_id_fkey
+FOREIGN KEY (SURVEY_ID)
+REFERENCES SURVEYS(ID)
+ON DELETE CASCADE;
+
+/*
+ * Удалить из таблицы "SURVEYS_ORGANIZATIONS_RELATIONSHIP" constraint.
+ */
+ALTER TABLE SURVEYS_QUESTIONS_RELATIONSHIP DROP CONSTRAINT surveys_questions_relationship_survey_id_fkey;
+
+/*
+ * Добавить первичный ключ в таблицу "SURVEYS_QUESTIONS_RELATIONSHIP" с каскадным удалением.
+ */
+ALTER TABLE SURVEYS_QUESTIONS_RELATIONSHIP
+ADD CONSTRAINT surveys_questions_relationship_survey_id_fkey
+FOREIGN KEY (SURVEY_ID)
+REFERENCES SURVEYS(ID)
+ON DELETE CASCADE;
