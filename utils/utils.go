@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
 )
 
 /*
@@ -62,4 +64,45 @@ The main task of the function is to create a response with success message.
 */
 func ResponseWithSuccess(responseWriter http.ResponseWriter, responseStatus int, successMessage string) {
 	Response(responseWriter, responseStatus, map[string]string{"STATUS": "SUCCESS", "DESCRIPTION": successMessage})
+}
+
+/*
+Function name:
+"ConvertIntArrayToString".
+
+Function description:
+The main task of the function is to convert int array to string separated by ','.
+*/
+func ConvertIntArrayToString(input []int) string {
+	if len(input) == 0 {
+		return ""
+	}
+	estimate := len(input) * 4
+	b := make([]byte, 0, estimate)
+	for _, n := range input {
+		b = strconv.AppendInt(b, int64(n), 10)
+		b = append(b, ',')
+	}
+	b = b[:len(b)-1]
+	return string(b)
+}
+
+/*
+Function name:
+"ConvertStringArrayToString".
+
+Function description:
+The main task of the function is to convert string array to string separated by ','.
+*/
+func ConvertStringArrayToString(input []string) string {
+	var output strings.Builder
+	for i := 0; i < len(input); i++ {
+		output.WriteString("'")
+		output.WriteString(input[i])
+		output.WriteString("'")
+		if i < len(input) - 1 {
+			output.WriteString(",")
+		}
+	}
+	return output.String()
 }

@@ -7,19 +7,20 @@ import (
 	"questionnaire/database"
 	"questionnaire/models"
 	"questionnaire/utils"
+	"strconv"
 	"strings"
 )
 
-var CreateSingleSurveyQuestionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
-	// Variable has been initialized by assigning it a "SurveyQuestionRelationship" struct.
-	surveyQuestionRelationship := models.SurveyQuestionRelationship{}
+var CreateSingleFactorQuestionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Variable has been initialized by assigning it a "FactorQuestionRelationship" struct.
+	factorQuestionRelationship := models.FactorQuestionRelationship{}
 
 	// "NewDecoder" returns a new decoder that reads from request body.
 	// The decoder introduces its own buffering and may read data from request body beyond the JSON values requested.
 	decoder := json.NewDecoder(request.Body)
 
-	// Decode reads the JSON value from its input and stores it in the value pointed to by "&surveyQuestionRelationship".
-	if err := decoder.Decode(&surveyQuestionRelationship); err != nil {
+	// Decode reads the JSON value from its input and stores it in the value pointed to by "&factorQuestionRelationship".
+	if err := decoder.Decode(&factorQuestionRelationship); err != nil {
 		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
@@ -29,7 +30,7 @@ var CreateSingleSurveyQuestionRelationship = func(responseWriter http.ResponseWr
 	defer request.Body.Close()
 
 	// CRUD interface of "GORM" ORM library to create new entry.
-	if err := database.DBGORM.Save(&surveyQuestionRelationship).Error; err != nil {
+	if err := database.DBGORM.Save(&factorQuestionRelationship).Error; err != nil {
 		log.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
@@ -39,9 +40,10 @@ var CreateSingleSurveyQuestionRelationship = func(responseWriter http.ResponseWr
 	utils.ResponseWithSuccess(responseWriter, http.StatusCreated, "http.StatusCreated")
 }
 
-var CreateMultipleSurveyQuestionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+var CreateMultipleFactorQuestionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Initialize "RequestBody" struct.
 	type RequestBody struct {
-		SurveyID string `json:"survey_id"`
+		FactorID int `json:"factor_id"`
 		Questions []int `json:"questions"`
 	}
 
@@ -61,9 +63,9 @@ var CreateMultipleSurveyQuestionRelationship = func(responseWriter http.Response
 
 	// Build SQL statement.
 	var sqlStatement strings.Builder
-	sqlStatement.WriteString("INSERT INTO SURVEYS_QUESTIONS_RELATIONSHIP (SURVEY_ID, QUESTION_ID) SELECT '")
-	sqlStatement.WriteString(requestBody.SurveyID)
-	sqlStatement.WriteString("' SURVEY_ID, QUESTION_ID FROM UNNEST(ARRAY[")
+	sqlStatement.WriteString("INSERT INTO FACTORS_QUESTIONS_RELATIONSHIP (FACTOR_ID, QUESTION_ID) SELECT ")
+	sqlStatement.WriteString(strconv.Itoa(requestBody.FactorID))
+	sqlStatement.WriteString(" FACTOR_ID, QUESTION_ID FROM UNNEST(ARRAY[")
 	sqlStatement.WriteString(utils.ConvertIntArrayToString(requestBody.Questions))
 	sqlStatement.WriteString("]) QUESTION_ID")
 
@@ -78,25 +80,25 @@ var CreateMultipleSurveyQuestionRelationship = func(responseWriter http.Response
 	utils.ResponseWithSuccess(responseWriter, http.StatusCreated, "http.StatusCreated")
 }
 
-var DeleteSingleSurveyQuestionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+var DeleteSingleFactorQuestionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
 	// Variable has been initialized by assigning it a array of URL parameters from the request.
 	keys := request.URL.Query()
 
 	// Check if an array contains any element.
 	if len(keys) > 0 {
-		// Variable has been initialized by assigning it a unique identifier of survey.
-		surveyIdentifier := keys.Get("survey_id")
+		// Variable has been initialized by assigning it a unique identifier of factor.
+		factorIdentifier := keys.Get("factor_id")
 
 		// Variable has been initialized by assigning it a unique identifier of question.
 		questionIdentifier := keys.Get("question_id")
 
 		// Check the value of the variables.
-		if len(surveyIdentifier) != 0 && len(questionIdentifier) != 0 {
-			// Variable has been initialized by assigning it a "SurveyQuestionRelationship" struct.
-			surveyQuestionRelationship := models.SurveyQuestionRelationship{}
+		if  len(factorIdentifier) != 0 && len(questionIdentifier) != 0 {
+			// Variable has been initialized by assigning it a "FactorQuestionRelationship" struct.
+			factorQuestionRelationship := models.FactorQuestionRelationship{}
 
 			// CRUD interface of "GORM" ORM library to delete information of the entry.
-			if err := database.DBGORM.Where("SURVEY_ID = ? AND QUESTION_ID = ?", surveyIdentifier, questionIdentifier).Delete(&surveyQuestionRelationship).Error; err != nil {
+			if err := database.DBGORM.Where("FACTOR_ID = ? AND QUESTION_ID = ?", factorIdentifier, questionIdentifier).Delete(&factorQuestionRelationship).Error; err != nil {
 				log.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
@@ -114,22 +116,22 @@ var DeleteSingleSurveyQuestionRelationship = func(responseWriter http.ResponseWr
 	utils.ResponseWithSuccess(responseWriter, http.StatusOK, "http.StatusOK")
 }
 
-var DeleteMultipleSurveyQuestionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+var DeleteMultipleFactorQuestionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
 	// Variable has been initialized by assigning it a array of URL parameters from the request.
 	keys := request.URL.Query()
 
 	// Check if an array contains any element.
 	if len(keys) > 0 {
-		// Variable has been initialized by assigning it a unique identifier of survey.
-		surveyIdentifier := keys.Get("survey_id")
+		// Variable has been initialized by assigning it a unique identifier of factor.
+		factorIdentifier := keys.Get("factor_id")
 
 		// Check the value of the variables.
-		if len(surveyIdentifier) != 0 {
-			// Variable has been initialized by assigning it a "SurveyQuestionRelationship" struct.
-			surveyQuestionRelationship := models.SurveyQuestionRelationship{}
+		if len(factorIdentifier) != 0 {
+			// Variable has been initialized by assigning it a "SurveyFactorRelationship" struct.
+			factorQuestionRelationship := models.FactorQuestionRelationship{}
 
 			// CRUD interface of "GORM" ORM library to delete information of the entry.
-			if err := database.DBGORM.Where("SURVEY_ID = ?", surveyIdentifier).Delete(&surveyQuestionRelationship).Error; err != nil {
+			if err := database.DBGORM.Where("FACTOR_ID = ?", factorIdentifier).Delete(&factorQuestionRelationship).Error; err != nil {
 				log.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
@@ -147,7 +149,7 @@ var DeleteMultipleSurveyQuestionRelationship = func(responseWriter http.Response
 	utils.ResponseWithSuccess(responseWriter, http.StatusOK, "http.StatusOK")
 }
 
-var GetBetaSurveysQuestionsRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+var GetBetaFactorsQuestionsRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
 	// Variable has been initialized by assigning it a array of URL parameters from the request.
 	keys := request.URL.Query()
 
@@ -156,13 +158,13 @@ var GetBetaSurveysQuestionsRelationship = func(responseWriter http.ResponseWrite
 
 	// Check if an array contains any element.
 	if len(keys) > 0 {
-		// Variable has been initialized by assigning it a unique identifier of survey.
-		surveyIdentifier := keys.Get("survey_id")
+		// Variable has been initialized by assigning it a unique identifier of factor.
+		factorIdentifier := keys.Get("factor_id")
 
 		// Check the value of the variables.
-		if len(surveyIdentifier) != 0 {
+		if len(factorIdentifier) != 0 {
 			// Make SQL query by "database/sql" package.
-			rows, err := database.DBSQL.Query("SELECT ID, NAME, WIDGET FROM SURVEYS_QUESTIONS_RELATIONSHIP INNER JOIN QUESTIONS ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID WHERE SURVEY_ID = $1", surveyIdentifier); if err != nil {
+			rows, err := database.DBSQL.Query("SELECT ID, TEXT, WIDGET FROM FACTORS_QUESTIONS_RELATIONSHIP INNER JOIN QUESTIONS ON FACTORS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID WHERE FACTOR_ID = $1",  factorIdentifier); if err != nil {
 				log.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return

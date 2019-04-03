@@ -13,7 +13,8 @@ RUN go get github.com/gorilla/mux && \
   go get github.com/lib/pq && \
   go get github.com/joho/godotenv && \
   go get github.com/jinzhu/gorm && \
-  go get github.com/pkg/errors
+  go get github.com/pkg/errors && \
+  go get github.com/mileusna/crontab
 
 RUN apt-get update && apt-get install -y libaio1 build-essential unzip curl vim
 

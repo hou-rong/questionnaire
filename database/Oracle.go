@@ -53,7 +53,7 @@ func ConnectOracle() {
 		panic(err)
 	}
 
-	log.Println("RESTful web service successfully connected to remote ORACLE database with the help of \"gopkg.in/goracle.v2\" package.")
+	log.Println("Web service successfully connected to remote ORACLE database with the help of \"gopkg.in/goracle.v2\" package.")
 }
 
 /*

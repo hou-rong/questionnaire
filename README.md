@@ -1,6 +1,6 @@
 # Description
 
-`questionnaire` is a RESTful web service which is part of the project called `Questionnaire`.
+`questionnaire` is a web service which is part of the project called `Questionnaire`.
 
 # Technical Details
 
@@ -12,6 +12,7 @@
 * [godotenv](https://github.com/joho/godotenv) - A Golang port of the Ruby dotenv project which loads environment variables from a `.env` file.
 * [GORM](http://gorm.io/) - ORM library for Golang.
 * [goracle](https://github.com/go-goracle/goracle) - Oracle driver for Go, using the ODPI-C driver.
+* [crontab](https://github.com/mileusna/crontab) - Golang crontab ticker.
 
 Instruction to cross compile Golang application with CGO packages from `windows/x64` to `linux/amd64`:
 - Install [tdm-gcc](http://tdm-gcc.tdragon.net/download). A compiler suite for 32- and 64-bit Windows based on the GNU toolchain.
@@ -21,7 +22,6 @@ Instruction to cross compile Golang application with CGO packages from `windows/
   set GOARCH=amd64
   go build -v -o questionnaire -ldflags="-extld=$CC"
   ```
-
 
 # APIs
 RESTful web service consists of several URLs which we can group by categories.
@@ -42,6 +42,14 @@ Set `Content-Type` as `application/json` in `POST` and `PUT` requests. In the bo
 
 List of all available routes of the project you can see in `routes/routes.go` file. 
 
+# CRONTAB
+
+Several scripts are used to update and synchronize data in the sources:
+* `controllers/creator.go`
+* `controllers/tracker.go`
+
+Both of these scripts run every minute (`* * * * *`).
+
 # Database Details
 
 If you get `ERROR: duplicate key violates unique constraint` message when trying to insert data into a `questions` table of the `PostgreSQL` database, try to execute such sql statement to fix error:
@@ -52,6 +60,60 @@ SELECT nextval('questions_id_seq');
 
 SELECT setval('questions_id_seq', (SELECT MAX(id) FROM options) + 1);
 ```
+
+`СHECK_FOR_UPDATES_IN_SURVEYS` trigger:
+```
+CREATE TRIGGER СHECK_FOR_UPDATES_IN_SURVEYS
+BEFORE UPDATE ON SURVEYS
+FOR EACH ROW
+WHEN (
+    OLD.UPDATED_AT IS DISTINCT FROM NEW.UPDATED_AT
+) EXECUTE PROCEDURE CREATE_SURVEYS_QUESTIONS_RELATIONSHIP();
+```
+
+`CREATE_SURVEYS_QUESTIONS_RELATIONSHIP` procedure:
+```
+CREATE OR REPLACE FUNCTION CREATE_SURVEYS_QUESTIONS_RELATIONSHIP() RETURNS TRIGGER AS $FUNCTION$
+    BEGIN
+        DELETE FROM SURVEYS_QUESTIONS_RELATIONSHIP WHERE SURVEY_ID = NEW.ID;
+        INSERT INTO SURVEYS_QUESTIONS_RELATIONSHIP (SURVEY_ID, QUESTION_ID)
+        SELECT NEW.ID SURVEY_ID, QUESTION_ID
+        FROM FACTORS_QUESTIONS_RELATIONSHIP
+        WHERE FACTOR_ID IN (
+            SELECT FACTOR_ID FROM SURVEYS_FACTORS_RELATIONSHIP
+            WHERE SURVEY_ID = NEW.ID
+        );
+        RETURN NEW;
+    END;
+$FUNCTION$ LANGUAGE plpgsql;
+```
+
+`tracker` procedure:
+```
+CREATE OR REPLACE PROCEDURE tracker(CUSTOM_TIME TIMESTAMP WITHOUT TIME ZONE) AS $FUNCTION$
+    BEGIN
+        UPDATE SURVEYS SET CONDITION = 3 WHERE CONDITION = 2 AND START_PERIOD IS NOT NULL AND END_PERIOD IS NOT NULL AND CUSTOM_TIME > END_PERIOD;
+        UPDATE SURVEYS SET BLOCKED = TRUE WHERE CONDITION = 2 AND START_PERIOD IS NOT NULL AND END_PERIOD IS NOT NULL AND CUSTOM_TIME BETWEEN START_PERIOD AND END_PERIOD;
+    END;
+$FUNCTION$ LANGUAGE plpgsql;
+```
+
+`creator` procedure:
+```
+CREATE OR REPLACE PROCEDURE creator(SURVEY_IDENTIFIER uuid, EMPLOYEES VARCHAR[]) AS $FUNCTION$
+    BEGIN
+        DELETE FROM SURVEYS_EMPLOYEES_RELATIONSHIP
+        WHERE SURVEY_ID = SURVEY_IDENTIFIER
+        AND EMPLOYEE <> ALL (EMPLOYEES);
+        INSERT INTO SURVEYS_EMPLOYEES_RELATIONSHIP (SURVEY_ID, EMPLOYEE) 
+        SELECT SURVEY_IDENTIFIER SURVEY_ID, EMPLOYEE FROM UNNEST(ARRAY[EMPLOYEES]) EMPLOYEE
+        ON CONFLICT ON CONSTRAINT unique_key 
+        DO NOTHING;
+    END;
+$FUNCTION$ LANGUAGE plpgsql;
+```
+
+List of all available sql queries of the project you can easily find in `queries.sql` file.
 
 # Production
 
@@ -77,7 +139,8 @@ RUN go get github.com/gorilla/mux && \
   go get github.com/lib/pq && \
   go get github.com/joho/godotenv && \
   go get github.com/jinzhu/gorm && \
-  go get github.com/pkg/errors
+  go get github.com/pkg/errors && \
+  go get github.com/mileusna/crontab
 
 RUN apt-get update && apt-get install -y libaio1 build-essential unzip curl vim
 
@@ -109,7 +172,7 @@ CMD ["./questionnaire"]
 
 Inside `run.sh` file you can notice the instruction which you can use to create the `docker container`:
 ```
-sudo docker run --name questionnaire_container -d -p 1000:8000 questionnaire_image
+sudo docker run --name questionnaire_container -e TZ=Asia/Almaty -d -p 1000:8000 questionnaire_image
 ```
 
 # License

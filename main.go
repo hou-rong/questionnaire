@@ -4,8 +4,10 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	"github.com/mileusna/crontab"
 	"log"
 	"net/http"
+	"questionnaire/controllers"
 	"questionnaire/database"
 	"questionnaire/routes"
 	"questionnaire/utils"
@@ -45,7 +47,17 @@ func main()  {
 	// Defining the application port for listening the HTTP requests.
 	port := utils.CheckEnvironmentVariable("APPLICATION_PORT")
 
-	log.Printf("RESTful web service is running on %s port.", port)
+	log.Printf("Web service is running on %s port.", port)
+
+	err = crontab.New().AddJob("* * * * *", controllers.Tracker); if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	err = crontab.New().AddJob("* * * * *", controllers.Creator); if err != nil {
+		log.Fatal(err)
+		return
+	}
 
 	// The application is starting to listen and serving the RESTful web service with CORS options.
 	log.Fatal(http.ListenAndServe(":" + port, handlers.CORS(headers, methods, origins)(router)))
