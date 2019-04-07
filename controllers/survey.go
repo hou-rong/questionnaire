@@ -10,6 +10,8718 @@ import (
 	"questionnaire/utils"
 )
 
+var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Variable has been initialized by assigning it a array.
+	var surveys []models.AlphaSurvey
+
+	// Variable has been initialized by assigning it a array of URL parameters from the request.
+	keys := request.URL.Query()
+
+	// Check if an array contains any element.
+	if len(keys) == 0 {
+		// Execute the SQL query to get all surveys.
+		firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS ORDER BY CREATED_AT DESC;"); if err != nil {
+			log.Println(err)
+			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		// Call "Close" function to the result set of the first SQL query.
+		defer firstQuery.Close()
+
+		// Parse the result set of the first SQL query.
+		for firstQuery.Next() {
+			// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+			var survey models.AlphaSurvey
+
+			// Call "Scan()" function to the result set of the first SQL query.
+			if err := firstQuery.Scan(&survey.ID,
+				&survey.Name,
+				&survey.Description,
+				&survey.Category,
+				&survey.Condition,
+				&survey.Mark,
+				&survey.Control,
+				&survey.StartPeriod,
+				&survey.EndPeriod,
+				&survey.CreatedAt,
+				&survey.UpdatedAt,
+				&survey.Email,
+				&survey.Blocked,
+				&survey.TotalRespondents,
+				&survey.PastRespondents); err != nil {
+				log.Println(err)
+				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+				return
+			}
+
+			// Execute the SQL query to get all question.
+			secondQuery, err := database.DBSQL.Query(`SELECT
+				QUESTIONS.ID,
+				QUESTIONS.TEXT,
+				QUESTIONS.WIDGET,
+				QUESTIONS.REQUIRED,
+				QUESTIONS.POSITION
+			FROM SURVEYS_QUESTIONS_RELATIONSHIP
+			INNER JOIN QUESTIONS
+			ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+			WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+				log.Println(err)
+				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+				return
+			}
+
+			// Parse the result set of the second SQL query.
+			for secondQuery.Next() {
+				// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+				var question models.AlphaQuestion
+
+				// Call "Scan()" function to the result set of the second SQL query.
+				if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Execute SQL query to get information about all options of the specific question.
+				thirdQuery, err := database.DBSQL.Query(`SELECT
+					OPTIONS.ID,
+					OPTIONS.TEXT,
+       				OPTIONS.POSITION
+				FROM QUESTIONS_OPTIONS_RELATIONSHIP
+				INNER JOIN OPTIONS
+				ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+				WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Parse the result set of the third SQL query.
+				for thirdQuery.Next() {
+					// Variable "option" has been initialized by assigning it to a "Option" struct.
+					var option models.Option
+
+					// Call "Scan()" function to the result set of the third SQL query.
+					if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Append the information about option to the array.
+					question.Options = append(question.Options, option)
+				}
+
+				// Call "Close" function to the result set of the second SQL query.
+				thirdQuery.Close()
+
+				// Append information about question to the array.
+				survey.Questions = append(survey.Questions, question)
+			}
+
+			// Call "Close" function to the result set of the second SQL query.
+			secondQuery.Close()
+
+			// Append information about survey to the array.
+			surveys = append(surveys, survey)
+		}
+	} else {
+		// Variable has been initialized by assigning it a unique identifier of category.
+		categoryIdentifier := keys.Get("category_id")
+
+		// Variable has been initialized by assigning it a unique identifier of condition.
+		conditionIdentifier := keys.Get("condition_id")
+
+		// Variable has been initialized by assigning it a mark.
+		mark := keys.Get("mark")
+
+		// Variable has been initialized by assigning it a control.
+		control := keys.Get("control")
+
+		// Variable has been initialized by assigning it a email.
+		email := keys.Get("email")
+
+		if len(categoryIdentifier) != 0 && len(conditionIdentifier) != 0 && len(mark) != 0 && len(control) != 0 && len(email) != 0 {
+			if conditionIdentifier == "1" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 AND CONTROL = $4 AND EMAIL = $5 ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier, mark, control, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "2" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 AND CONTROL = $4 AND EMAIL = $5 ORDER BY START_PERIOD DESC;", categoryIdentifier, conditionIdentifier, mark, control, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "3" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 AND CONTROL = $4 AND EMAIL = $5 ORDER BY END_PERIOD DESC;", categoryIdentifier, conditionIdentifier, mark, control, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 AND CONTROL = $4 AND EMAIL = $5 ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier, mark, control, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			}
+		} else if len(categoryIdentifier) != 0 && len(conditionIdentifier) != 0 && len(mark) != 0 && len(control) != 0 {
+			if conditionIdentifier == "1" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 AND CONTROL = $4 ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier, mark, control); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "2" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 AND CONTROL = $4 ORDER BY START_PERIOD DESC;", categoryIdentifier, conditionIdentifier, mark, control); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "3" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 AND CONTROL = $4 ORDER BY END_PERIOD DESC;", categoryIdentifier, conditionIdentifier, mark, control); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 AND CONTROL = $4 ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier, mark, control); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			}
+		} else if len(categoryIdentifier) != 0 && len(conditionIdentifier) != 0 && len(mark) != 0 && len(email) != 0 {
+			if conditionIdentifier == "1" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 AND EMAIL = $4 ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier, mark, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "2" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 AND EMAIL = $4 ORDER BY START_PERIOD DESC;", categoryIdentifier, conditionIdentifier, mark, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "3" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 AND EMAIL = $4 ORDER BY END_PERIOD DESC;", categoryIdentifier, conditionIdentifier, mark, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 AND EMAIL = $4 ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier, mark, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			}
+		} else if len(categoryIdentifier) != 0 && len(conditionIdentifier) != 0 && len(control) != 0 && len(email) != 0 {
+			if conditionIdentifier == "1" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND CONTROL = $3 AND EMAIL = $4 ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier, control, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "2" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND CONTROL = $3 AND EMAIL = $4 ORDER BY START_PERIOD DESC;", categoryIdentifier, conditionIdentifier, control, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "3" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND CONTROL = $3 AND EMAIL = $4 ORDER BY END_PERIOD DESC;", categoryIdentifier, conditionIdentifier, control, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND CONTROL = $3 AND EMAIL = $4 ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier, control, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+				QUESTIONS.ID,
+				QUESTIONS.TEXT,
+				QUESTIONS.WIDGET,
+				QUESTIONS.REQUIRED,
+				QUESTIONS.POSITION
+			FROM SURVEYS_QUESTIONS_RELATIONSHIP
+			INNER JOIN QUESTIONS
+			ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+			WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+					OPTIONS.ID,
+					OPTIONS.TEXT,
+       				OPTIONS.POSITION
+				FROM QUESTIONS_OPTIONS_RELATIONSHIP
+				INNER JOIN OPTIONS
+				ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+				WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			}
+		} else if len(conditionIdentifier) != 0 && len(mark) != 0 && len(control) != 0 && len(email) != 0 {
+			if conditionIdentifier == "1" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 AND CONTROL = $3 AND EMAIL = $4 ORDER BY CREATED_AT DESC;", conditionIdentifier, mark, control, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "2" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 AND CONTROL = $3 AND EMAIL = $4 ORDER BY START_PERIOD DESC;", conditionIdentifier, mark, control, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "3" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 AND CONTROL = $3 AND EMAIL = $4 ORDER BY END_PERIOD DESC;", conditionIdentifier, mark, control, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 AND CONTROL = $3 AND EMAIL = $4 ORDER BY CREATED_AT DESC;", conditionIdentifier, mark, control, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			}
+		} else if len(categoryIdentifier) != 0 && len(mark) != 0 && len(control) != 0 && len(email) != 0 {
+			// Execute the SQL query to get all surveys.
+			firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND MARK = $2 AND CONTROL = $3 AND EMAIL = $4 ORDER BY CREATED_AT DESC;", categoryIdentifier, mark, control, email); if err != nil {
+				log.Println(err)
+				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+				return
+			}
+
+			// Call "Close" function to the result set of the first SQL query.
+			defer firstQuery.Close()
+
+			// Parse the result set of the first SQL query.
+			for firstQuery.Next() {
+				// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+				var survey models.AlphaSurvey
+
+				// Call "Scan()" function to the result set of the first SQL query.
+				if err := firstQuery.Scan(&survey.ID,
+					&survey.Name,
+					&survey.Description,
+					&survey.Category,
+					&survey.Condition,
+					&survey.Mark,
+					&survey.Control,
+					&survey.StartPeriod,
+					&survey.EndPeriod,
+					&survey.CreatedAt,
+					&survey.UpdatedAt,
+					&survey.Email,
+					&survey.Blocked,
+					&survey.TotalRespondents,
+					&survey.PastRespondents); err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Execute the SQL query to get all question.
+				secondQuery, err := database.DBSQL.Query(`SELECT
+					QUESTIONS.ID,
+					QUESTIONS.TEXT,
+					QUESTIONS.WIDGET,
+					QUESTIONS.REQUIRED,
+					QUESTIONS.POSITION
+				FROM SURVEYS_QUESTIONS_RELATIONSHIP
+				INNER JOIN QUESTIONS
+				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+				WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Parse the result set of the second SQL query.
+				for secondQuery.Next() {
+					// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+					var question models.AlphaQuestion
+
+					// Call "Scan()" function to the result set of the second SQL query.
+					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute SQL query to get information about all options of the specific question.
+					thirdQuery, err := database.DBSQL.Query(`SELECT
+						OPTIONS.ID,
+						OPTIONS.TEXT,
+       					OPTIONS.POSITION
+					FROM QUESTIONS_OPTIONS_RELATIONSHIP
+					INNER JOIN OPTIONS
+					ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+					WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the third SQL query.
+					for thirdQuery.Next() {
+						// Variable "option" has been initialized by assigning it to a "Option" struct.
+						var option models.Option
+
+						// Call "Scan()" function to the result set of the third SQL query.
+						if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Append the information about option to the array.
+						question.Options = append(question.Options, option)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					thirdQuery.Close()
+
+					// Append information about question to the array.
+					survey.Questions = append(survey.Questions, question)
+				}
+
+				// Call "Close" function to the result set of the second SQL query.
+				secondQuery.Close()
+
+				// Append information about survey to the array.
+				surveys = append(surveys, survey)
+			}
+		} else if len(categoryIdentifier) != 0 && len(conditionIdentifier) != 0 && len(mark) != 0 {
+			if conditionIdentifier == "1" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier, mark); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "2" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 ORDER BY START_PERIOD DESC;", categoryIdentifier, conditionIdentifier, mark); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "3" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 ORDER BY END_PERIOD DESC;", categoryIdentifier, conditionIdentifier, mark); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier, mark); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			}
+		} else if len(categoryIdentifier) != 0 && len(conditionIdentifier) != 0 && len(control) != 0 {
+			if conditionIdentifier == "1" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND CONTROL = $3 ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier, control); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "2" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND CONTROL = $3 ORDER BY START_PERIOD DESC;", categoryIdentifier, conditionIdentifier, control); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "3" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND CONTROL = $3 ORDER BY END_PERIOD DESC;", categoryIdentifier, conditionIdentifier, control); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND CONTROL = $3 ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier, control); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			}
+		} else if len(categoryIdentifier) != 0 && len(conditionIdentifier) != 0 && len(email) != 0 {
+			if conditionIdentifier == "1" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND EMAIL = $3 ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "2" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND EMAIL = $3 ORDER BY START_PERIOD DESC;", categoryIdentifier, conditionIdentifier, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "3" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND EMAIL = $3 ORDER BY END_PERIOD DESC;", categoryIdentifier, conditionIdentifier, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND EMAIL = $3 ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			}
+		} else if len(categoryIdentifier) != 0 && len(mark) != 0 && len(control) != 0 {
+			// Execute the SQL query to get all surveys.
+			firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND MARK = $2 AND CONTROL = $3 ORDER BY CREATED_AT DESC;", categoryIdentifier, mark, control); if err != nil {
+				log.Println(err)
+				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+				return
+			}
+
+			// Call "Close" function to the result set of the first SQL query.
+			defer firstQuery.Close()
+
+			// Parse the result set of the first SQL query.
+			for firstQuery.Next() {
+				// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+				var survey models.AlphaSurvey
+
+				// Call "Scan()" function to the result set of the first SQL query.
+				if err := firstQuery.Scan(&survey.ID,
+					&survey.Name,
+					&survey.Description,
+					&survey.Category,
+					&survey.Condition,
+					&survey.Mark,
+					&survey.Control,
+					&survey.StartPeriod,
+					&survey.EndPeriod,
+					&survey.CreatedAt,
+					&survey.UpdatedAt,
+					&survey.Email,
+					&survey.Blocked,
+					&survey.TotalRespondents,
+					&survey.PastRespondents); err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Execute the SQL query to get all question.
+				secondQuery, err := database.DBSQL.Query(`SELECT
+					QUESTIONS.ID,
+					QUESTIONS.TEXT,
+					QUESTIONS.WIDGET,
+					QUESTIONS.REQUIRED,
+					QUESTIONS.POSITION
+				FROM SURVEYS_QUESTIONS_RELATIONSHIP
+				INNER JOIN QUESTIONS
+				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+				WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Parse the result set of the second SQL query.
+				for secondQuery.Next() {
+					// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+					var question models.AlphaQuestion
+
+					// Call "Scan()" function to the result set of the second SQL query.
+					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute SQL query to get information about all options of the specific question.
+					thirdQuery, err := database.DBSQL.Query(`SELECT
+						OPTIONS.ID,
+						OPTIONS.TEXT,
+       					OPTIONS.POSITION
+					FROM QUESTIONS_OPTIONS_RELATIONSHIP
+					INNER JOIN OPTIONS
+					ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+					WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the third SQL query.
+					for thirdQuery.Next() {
+						// Variable "option" has been initialized by assigning it to a "Option" struct.
+						var option models.Option
+
+						// Call "Scan()" function to the result set of the third SQL query.
+						if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Append the information about option to the array.
+						question.Options = append(question.Options, option)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					thirdQuery.Close()
+
+					// Append information about question to the array.
+					survey.Questions = append(survey.Questions, question)
+				}
+
+				// Call "Close" function to the result set of the second SQL query.
+				secondQuery.Close()
+
+				// Append information about survey to the array.
+				surveys = append(surveys, survey)
+			}
+		} else if len(categoryIdentifier) != 0 && len(mark) != 0 && len(email) != 0 {
+			// Execute the SQL query to get all surveys.
+			firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND MARK = $2 AND EMAIL = $3 ORDER BY CREATED_AT DESC;", categoryIdentifier, mark, email); if err != nil {
+				log.Println(err)
+				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+				return
+			}
+
+			// Call "Close" function to the result set of the first SQL query.
+			defer firstQuery.Close()
+
+			// Parse the result set of the first SQL query.
+			for firstQuery.Next() {
+				// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+				var survey models.AlphaSurvey
+
+				// Call "Scan()" function to the result set of the first SQL query.
+				if err := firstQuery.Scan(&survey.ID,
+					&survey.Name,
+					&survey.Description,
+					&survey.Category,
+					&survey.Condition,
+					&survey.Mark,
+					&survey.Control,
+					&survey.StartPeriod,
+					&survey.EndPeriod,
+					&survey.CreatedAt,
+					&survey.UpdatedAt,
+					&survey.Email,
+					&survey.Blocked,
+					&survey.TotalRespondents,
+					&survey.PastRespondents); err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Execute the SQL query to get all question.
+				secondQuery, err := database.DBSQL.Query(`SELECT
+					QUESTIONS.ID,
+					QUESTIONS.TEXT,
+					QUESTIONS.WIDGET,
+					QUESTIONS.REQUIRED,
+					QUESTIONS.POSITION
+				FROM SURVEYS_QUESTIONS_RELATIONSHIP
+				INNER JOIN QUESTIONS
+				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+				WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Parse the result set of the second SQL query.
+				for secondQuery.Next() {
+					// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+					var question models.AlphaQuestion
+
+					// Call "Scan()" function to the result set of the second SQL query.
+					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute SQL query to get information about all options of the specific question.
+					thirdQuery, err := database.DBSQL.Query(`SELECT
+						OPTIONS.ID,
+						OPTIONS.TEXT,
+       					OPTIONS.POSITION
+					FROM QUESTIONS_OPTIONS_RELATIONSHIP
+					INNER JOIN OPTIONS
+					ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+					WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the third SQL query.
+					for thirdQuery.Next() {
+						// Variable "option" has been initialized by assigning it to a "Option" struct.
+						var option models.Option
+
+						// Call "Scan()" function to the result set of the third SQL query.
+						if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Append the information about option to the array.
+						question.Options = append(question.Options, option)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					thirdQuery.Close()
+
+					// Append information about question to the array.
+					survey.Questions = append(survey.Questions, question)
+				}
+
+				// Call "Close" function to the result set of the second SQL query.
+				secondQuery.Close()
+
+				// Append information about survey to the array.
+				surveys = append(surveys, survey)
+			}
+		} else if len(categoryIdentifier) != 0 && len(control) != 0 && len(email) != 0 {
+			// Execute the SQL query to get all surveys.
+			firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONTROL = $2 AND EMAIL = $3 ORDER BY CREATED_AT DESC;", categoryIdentifier, control, email); if err != nil {
+				log.Println(err)
+				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+				return
+			}
+
+			// Call "Close" function to the result set of the first SQL query.
+			defer firstQuery.Close()
+
+			// Parse the result set of the first SQL query.
+			for firstQuery.Next() {
+				// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+				var survey models.AlphaSurvey
+
+				// Call "Scan()" function to the result set of the first SQL query.
+				if err := firstQuery.Scan(&survey.ID,
+					&survey.Name,
+					&survey.Description,
+					&survey.Category,
+					&survey.Condition,
+					&survey.Mark,
+					&survey.Control,
+					&survey.StartPeriod,
+					&survey.EndPeriod,
+					&survey.CreatedAt,
+					&survey.UpdatedAt,
+					&survey.Email,
+					&survey.Blocked,
+					&survey.TotalRespondents,
+					&survey.PastRespondents); err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Execute the SQL query to get all question.
+				secondQuery, err := database.DBSQL.Query(`SELECT
+					QUESTIONS.ID,
+					QUESTIONS.TEXT,
+					QUESTIONS.WIDGET,
+					QUESTIONS.REQUIRED,
+					QUESTIONS.POSITION
+				FROM SURVEYS_QUESTIONS_RELATIONSHIP
+				INNER JOIN QUESTIONS
+				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+				WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Parse the result set of the second SQL query.
+				for secondQuery.Next() {
+					// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+					var question models.AlphaQuestion
+
+					// Call "Scan()" function to the result set of the second SQL query.
+					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute SQL query to get information about all options of the specific question.
+					thirdQuery, err := database.DBSQL.Query(`SELECT
+						OPTIONS.ID,
+						OPTIONS.TEXT,
+       					OPTIONS.POSITION
+					FROM QUESTIONS_OPTIONS_RELATIONSHIP
+					INNER JOIN OPTIONS
+					ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+					WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the third SQL query.
+					for thirdQuery.Next() {
+						// Variable "option" has been initialized by assigning it to a "Option" struct.
+						var option models.Option
+
+						// Call "Scan()" function to the result set of the third SQL query.
+						if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Append the information about option to the array.
+						question.Options = append(question.Options, option)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					thirdQuery.Close()
+
+					// Append information about question to the array.
+					survey.Questions = append(survey.Questions, question)
+				}
+
+				// Call "Close" function to the result set of the second SQL query.
+				secondQuery.Close()
+
+				// Append information about survey to the array.
+				surveys = append(surveys, survey)
+			}
+		} else if len(conditionIdentifier) != 0 && len(mark) != 0 && len(control) != 0 {
+			if conditionIdentifier == "1" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 AND CONTROL = $3 ORDER BY CREATED_AT DESC;", conditionIdentifier, mark, control); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "2" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 AND CONTROL = $3 ORDER BY START_PERIOD DESC;", conditionIdentifier, mark, control); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "3" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 AND CONTROL = $3 ORDER BY END_PERIOD DESC;", conditionIdentifier, mark, control); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 AND CONTROL = $3 ORDER BY CREATED_AT DESC;", conditionIdentifier, mark, control); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			}
+		} else if len(conditionIdentifier) != 0 && len(mark) != 0 && len(email) != 0 {
+			if conditionIdentifier == "1" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 AND EMAIL = $3 ORDER BY CREATED_AT DESC;", conditionIdentifier, mark, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "2" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 AND EMAIL = $3 ORDER BY START_PERIOD DESC;", conditionIdentifier, mark, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "3" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 AND EMAIL = $3 ORDER BY END_PERIOD DESC;", conditionIdentifier, mark, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 AND EMAIL = $3 ORDER BY CREATED_AT DESC;", conditionIdentifier, mark, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			}
+		} else if len(conditionIdentifier) != 0 && len(control) != 0 && len(email) != 0 {
+			if conditionIdentifier == "1" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND CONTROL = $2 AND EMAIL = $3 ORDER BY CREATED_AT DESC;", conditionIdentifier, control, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+			  		FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "2" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND CONTROL = $2 AND EMAIL = $3 ORDER BY START_PERIOD DESC;", conditionIdentifier, control, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "3" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND CONTROL = $2 AND EMAIL = $3 ORDER BY END_PERIOD DESC;", conditionIdentifier, control, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND CONTROL = $2 AND EMAIL = $3 ORDER BY CREATED_AT DESC;", conditionIdentifier, control, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			}
+		} else if len(mark) != 0 && len(control) != 0 && len(email)!= 0 {
+			// Execute the SQL query to get all surveys.
+			firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE MARK = $1 AND CONTROL = $2 AND EMAIL = $3 ORDER BY CREATED_AT DESC;", mark, control, email); if err != nil {
+				log.Println(err)
+				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+				return
+			}
+
+			// Call "Close" function to the result set of the first SQL query.
+			defer firstQuery.Close()
+
+			// Parse the result set of the first SQL query.
+			for firstQuery.Next() {
+				// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+				var survey models.AlphaSurvey
+
+				// Call "Scan()" function to the result set of the first SQL query.
+				if err := firstQuery.Scan(&survey.ID,
+					&survey.Name,
+					&survey.Description,
+					&survey.Category,
+					&survey.Condition,
+					&survey.Mark,
+					&survey.Control,
+					&survey.StartPeriod,
+					&survey.EndPeriod,
+					&survey.CreatedAt,
+					&survey.UpdatedAt,
+					&survey.Email,
+					&survey.Blocked,
+					&survey.TotalRespondents,
+					&survey.PastRespondents); err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Execute the SQL query to get all question.
+				secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+				FROM SURVEYS_QUESTIONS_RELATIONSHIP
+				INNER JOIN QUESTIONS
+				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+				WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Parse the result set of the second SQL query.
+				for secondQuery.Next() {
+					// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+					var question models.AlphaQuestion
+
+					// Call "Scan()" function to the result set of the second SQL query.
+					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute SQL query to get information about all options of the specific question.
+					thirdQuery, err := database.DBSQL.Query(`SELECT
+						OPTIONS.ID,
+						OPTIONS.TEXT,
+       					OPTIONS.POSITION
+					FROM QUESTIONS_OPTIONS_RELATIONSHIP
+					INNER JOIN OPTIONS
+					ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+					WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the third SQL query.
+					for thirdQuery.Next() {
+						// Variable "option" has been initialized by assigning it to a "Option" struct.
+						var option models.Option
+
+						// Call "Scan()" function to the result set of the third SQL query.
+						if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Append the information about option to the array.
+						question.Options = append(question.Options, option)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					thirdQuery.Close()
+
+					// Append information about question to the array.
+					survey.Questions = append(survey.Questions, question)
+				}
+
+				// Call "Close" function to the result set of the second SQL query.
+				secondQuery.Close()
+
+				// Append information about survey to the array.
+				surveys = append(surveys, survey)
+			}
+		} else if len(categoryIdentifier) != 0 && len(conditionIdentifier) != 0 {
+			if conditionIdentifier == "1" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "2" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 ORDER BY START_PERIOD DESC;", categoryIdentifier, conditionIdentifier); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "3" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 ORDER BY END_PERIOD DESC;", categoryIdentifier, conditionIdentifier); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = ? AND CONDITION = ? ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			}
+		} else if len(categoryIdentifier) != 0 && len(mark) != 0 {
+			// Execute the SQL query to get all surveys.
+			firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND MARK = $2 ORDER BY CREATED_AT DESC;", categoryIdentifier, mark); if err != nil {
+				log.Println(err)
+				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+				return
+			}
+
+			// Call "Close" function to the result set of the first SQL query.
+			defer firstQuery.Close()
+
+			// Parse the result set of the first SQL query.
+			for firstQuery.Next() {
+				// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+				var survey models.AlphaSurvey
+
+				// Call "Scan()" function to the result set of the first SQL query.
+				if err := firstQuery.Scan(&survey.ID,
+					&survey.Name,
+					&survey.Description,
+					&survey.Category,
+					&survey.Condition,
+					&survey.Mark,
+					&survey.Control,
+					&survey.StartPeriod,
+					&survey.EndPeriod,
+					&survey.CreatedAt,
+					&survey.UpdatedAt,
+					&survey.Email,
+					&survey.Blocked,
+					&survey.TotalRespondents,
+					&survey.PastRespondents); err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Execute the SQL query to get all question.
+				secondQuery, err := database.DBSQL.Query(`SELECT
+					QUESTIONS.ID,
+					QUESTIONS.TEXT,
+					QUESTIONS.WIDGET,
+					QUESTIONS.REQUIRED,
+					QUESTIONS.POSITION
+				FROM SURVEYS_QUESTIONS_RELATIONSHIP
+				INNER JOIN QUESTIONS
+				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+				WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Parse the result set of the second SQL query.
+				for secondQuery.Next() {
+					// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+					var question models.AlphaQuestion
+
+					// Call "Scan()" function to the result set of the second SQL query.
+					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute SQL query to get information about all options of the specific question.
+					thirdQuery, err := database.DBSQL.Query(`SELECT
+						OPTIONS.ID,
+						OPTIONS.TEXT,
+       					OPTIONS.POSITION
+					FROM QUESTIONS_OPTIONS_RELATIONSHIP
+					INNER JOIN OPTIONS
+					ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+					WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the third SQL query.
+					for thirdQuery.Next() {
+						// Variable "option" has been initialized by assigning it to a "Option" struct.
+						var option models.Option
+
+						// Call "Scan()" function to the result set of the third SQL query.
+						if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Append the information about option to the array.
+						question.Options = append(question.Options, option)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					thirdQuery.Close()
+
+					// Append information about question to the array.
+					survey.Questions = append(survey.Questions, question)
+				}
+
+				// Call "Close" function to the result set of the second SQL query.
+				secondQuery.Close()
+
+				// Append information about survey to the array.
+				surveys = append(surveys, survey)
+			}
+		} else if len(categoryIdentifier) != 0 && len(control) != 0 {
+			// Execute the SQL query to get all surveys.
+			firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONTROL = $2 ORDER BY CREATED_AT DESC;", categoryIdentifier, control); if err != nil {
+				log.Println(err)
+				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+				return
+			}
+
+			// Call "Close" function to the result set of the first SQL query.
+			defer firstQuery.Close()
+
+			// Parse the result set of the first SQL query.
+			for firstQuery.Next() {
+				// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+				var survey models.AlphaSurvey
+
+				// Call "Scan()" function to the result set of the first SQL query.
+				if err := firstQuery.Scan(&survey.ID,
+					&survey.Name,
+					&survey.Description,
+					&survey.Category,
+					&survey.Condition,
+					&survey.Mark,
+					&survey.Control,
+					&survey.StartPeriod,
+					&survey.EndPeriod,
+					&survey.CreatedAt,
+					&survey.UpdatedAt,
+					&survey.Email,
+					&survey.Blocked,
+					&survey.TotalRespondents,
+					&survey.PastRespondents); err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Execute the SQL query to get all question.
+				secondQuery, err := database.DBSQL.Query(`SELECT
+					QUESTIONS.ID,
+					QUESTIONS.TEXT,
+					QUESTIONS.WIDGET,
+					QUESTIONS.REQUIRED,
+					QUESTIONS.POSITION
+				FROM SURVEYS_QUESTIONS_RELATIONSHIP
+				INNER JOIN QUESTIONS
+				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+				WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Parse the result set of the second SQL query.
+				for secondQuery.Next() {
+					// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+					var question models.AlphaQuestion
+
+					// Call "Scan()" function to the result set of the second SQL query.
+					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute SQL query to get information about all options of the specific question.
+					thirdQuery, err := database.DBSQL.Query(`SELECT
+						OPTIONS.ID,
+						OPTIONS.TEXT,
+       					OPTIONS.POSITION
+					FROM QUESTIONS_OPTIONS_RELATIONSHIP
+					INNER JOIN OPTIONS
+					ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+					WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the third SQL query.
+					for thirdQuery.Next() {
+						// Variable "option" has been initialized by assigning it to a "Option" struct.
+						var option models.Option
+
+						// Call "Scan()" function to the result set of the third SQL query.
+						if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Append the information about option to the array.
+						question.Options = append(question.Options, option)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					thirdQuery.Close()
+
+					// Append information about question to the array.
+					survey.Questions = append(survey.Questions, question)
+				}
+
+				// Call "Close" function to the result set of the second SQL query.
+				secondQuery.Close()
+
+				// Append information about survey to the array.
+				surveys = append(surveys, survey)
+			}
+		} else if len(categoryIdentifier) != 0 && len(email) != 0 {
+			// Execute the SQL query to get all surveys.
+			firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND EMAIL = $2 ORDER BY CREATED_AT DESC;", categoryIdentifier, email); if err != nil {
+				log.Println(err)
+				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+				return
+			}
+
+			// Call "Close" function to the result set of the first SQL query.
+			defer firstQuery.Close()
+
+			// Parse the result set of the first SQL query.
+			for firstQuery.Next() {
+				// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+				var survey models.AlphaSurvey
+
+				// Call "Scan()" function to the result set of the first SQL query.
+				if err := firstQuery.Scan(&survey.ID,
+					&survey.Name,
+					&survey.Description,
+					&survey.Category,
+					&survey.Condition,
+					&survey.Mark,
+					&survey.Control,
+					&survey.StartPeriod,
+					&survey.EndPeriod,
+					&survey.CreatedAt,
+					&survey.UpdatedAt,
+					&survey.Email,
+					&survey.Blocked,
+					&survey.TotalRespondents,
+					&survey.PastRespondents); err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Execute the SQL query to get all question.
+				secondQuery, err := database.DBSQL.Query(`SELECT
+					QUESTIONS.ID,
+					QUESTIONS.TEXT,
+					QUESTIONS.WIDGET,
+					QUESTIONS.REQUIRED,
+					QUESTIONS.POSITION
+				FROM SURVEYS_QUESTIONS_RELATIONSHIP
+				INNER JOIN QUESTIONS
+				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+				WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Parse the result set of the second SQL query.
+				for secondQuery.Next() {
+					// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+					var question models.AlphaQuestion
+
+					// Call "Scan()" function to the result set of the second SQL query.
+					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute SQL query to get information about all options of the specific question.
+					thirdQuery, err := database.DBSQL.Query(`SELECT
+						OPTIONS.ID,
+						OPTIONS.TEXT,
+       					OPTIONS.POSITION
+					FROM QUESTIONS_OPTIONS_RELATIONSHIP
+					INNER JOIN OPTIONS
+					ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+					WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the third SQL query.
+					for thirdQuery.Next() {
+						// Variable "option" has been initialized by assigning it to a "Option" struct.
+						var option models.Option
+
+						// Call "Scan()" function to the result set of the third SQL query.
+						if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Append the information about option to the array.
+						question.Options = append(question.Options, option)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					thirdQuery.Close()
+
+					// Append information about question to the array.
+					survey.Questions = append(survey.Questions, question)
+				}
+
+				// Call "Close" function to the result set of the second SQL query.
+				secondQuery.Close()
+
+				// Append information about survey to the array.
+				surveys = append(surveys, survey)
+			}
+		} else if len(conditionIdentifier) != 0 && len(mark) != 0 {
+			if conditionIdentifier == "1" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 ORDER BY CREATED_AT DESC;", conditionIdentifier, mark); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "2" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 ORDER BY START_PERIOD DESC;", conditionIdentifier, mark); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "3" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 ORDER BY END_PERIOD DESC;", conditionIdentifier, mark); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 ORDER BY CREATED_AT DESC;", conditionIdentifier, mark); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			}
+		} else if len(conditionIdentifier) != 0 && len(control) != 0 {
+			if conditionIdentifier == "1" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND CONTROL = $2 ORDER BY CREATED_AT DESC;", conditionIdentifier, control); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "2" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND CONTROL = $2 ORDER BY START_PERIOD DESC;", conditionIdentifier, control); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "3" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND CONTROL = $2 ORDER BY END_PERIOD DESC;", conditionIdentifier, control); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND CONTROL = $2 ORDER BY CREATED_AT DESC;", conditionIdentifier, control); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			}
+		} else if len(conditionIdentifier) != 0 && len(email) != 0 {
+			if conditionIdentifier == "1" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND EMAIL = $2 ORDER BY CREATED_AT DESC;", conditionIdentifier, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "2" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND EMAIL = $2 ORDER BY START_PERIOD DESC;", conditionIdentifier, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "3" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND EMAIL = $2 ORDER BY END_PERIOD DESC;", conditionIdentifier, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND EMAIL = $2 ORDER BY CREATED_AT DESC;", conditionIdentifier, email); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			}
+		} else if len(mark) != 0 && len(control) != 0 {
+			// Execute the SQL query to get all surveys.
+			firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE MARK = $1 AND CONTROL = $2 ORDER BY CREATED_AT DESC;", mark, control); if err != nil {
+				log.Println(err)
+				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+				return
+			}
+
+			// Call "Close" function to the result set of the first SQL query.
+			defer firstQuery.Close()
+
+			// Parse the result set of the first SQL query.
+			for firstQuery.Next() {
+				// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+				var survey models.AlphaSurvey
+
+				// Call "Scan()" function to the result set of the first SQL query.
+				if err := firstQuery.Scan(&survey.ID,
+					&survey.Name,
+					&survey.Description,
+					&survey.Category,
+					&survey.Condition,
+					&survey.Mark,
+					&survey.Control,
+					&survey.StartPeriod,
+					&survey.EndPeriod,
+					&survey.CreatedAt,
+					&survey.UpdatedAt,
+					&survey.Email,
+					&survey.Blocked,
+					&survey.TotalRespondents,
+					&survey.PastRespondents); err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Execute the SQL query to get all question.
+				secondQuery, err := database.DBSQL.Query(`SELECT
+					QUESTIONS.ID,
+					QUESTIONS.TEXT,
+					QUESTIONS.WIDGET,
+					QUESTIONS.REQUIRED,
+					QUESTIONS.POSITION
+				FROM SURVEYS_QUESTIONS_RELATIONSHIP
+				INNER JOIN QUESTIONS
+				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+				WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Parse the result set of the second SQL query.
+				for secondQuery.Next() {
+					// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+					var question models.AlphaQuestion
+
+					// Call "Scan()" function to the result set of the second SQL query.
+					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute SQL query to get information about all options of the specific question.
+					thirdQuery, err := database.DBSQL.Query(`SELECT
+						OPTIONS.ID,
+						OPTIONS.TEXT,
+       					OPTIONS.POSITION
+					FROM QUESTIONS_OPTIONS_RELATIONSHIP
+					INNER JOIN OPTIONS
+					ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+					WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the third SQL query.
+					for thirdQuery.Next() {
+						// Variable "option" has been initialized by assigning it to a "Option" struct.
+						var option models.Option
+
+						// Call "Scan()" function to the result set of the third SQL query.
+						if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Append the information about option to the array.
+						question.Options = append(question.Options, option)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					thirdQuery.Close()
+
+					// Append information about question to the array.
+					survey.Questions = append(survey.Questions, question)
+				}
+
+				// Call "Close" function to the result set of the second SQL query.
+				secondQuery.Close()
+
+				// Append information about survey to the array.
+				surveys = append(surveys, survey)
+			}
+		} else if len(mark) != 0 && len(email) != 0 {
+			// Execute the SQL query to get all surveys.
+			firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE MARK = $1 AND EMAIL = $2 ORDER BY CREATED_AT DESC;", mark, email); if err != nil {
+				log.Println(err)
+				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+				return
+			}
+
+			// Call "Close" function to the result set of the first SQL query.
+			defer firstQuery.Close()
+
+			// Parse the result set of the first SQL query.
+			for firstQuery.Next() {
+				// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+				var survey models.AlphaSurvey
+
+				// Call "Scan()" function to the result set of the first SQL query.
+				if err := firstQuery.Scan(&survey.ID,
+					&survey.Name,
+					&survey.Description,
+					&survey.Category,
+					&survey.Condition,
+					&survey.Mark,
+					&survey.Control,
+					&survey.StartPeriod,
+					&survey.EndPeriod,
+					&survey.CreatedAt,
+					&survey.UpdatedAt,
+					&survey.Email,
+					&survey.Blocked,
+					&survey.TotalRespondents,
+					&survey.PastRespondents); err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Execute the SQL query to get all question.
+				secondQuery, err := database.DBSQL.Query(`SELECT
+					QUESTIONS.ID,
+					QUESTIONS.TEXT,
+					QUESTIONS.WIDGET,
+					QUESTIONS.REQUIRED,
+					QUESTIONS.POSITION
+				FROM SURVEYS_QUESTIONS_RELATIONSHIP
+				INNER JOIN QUESTIONS
+				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+				WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Parse the result set of the second SQL query.
+				for secondQuery.Next() {
+					// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+					var question models.AlphaQuestion
+
+					// Call "Scan()" function to the result set of the second SQL query.
+					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute SQL query to get information about all options of the specific question.
+					thirdQuery, err := database.DBSQL.Query(`SELECT
+						OPTIONS.ID,
+						OPTIONS.TEXT,
+       					OPTIONS.POSITION
+					FROM QUESTIONS_OPTIONS_RELATIONSHIP
+					INNER JOIN OPTIONS
+					ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+					WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the third SQL query.
+					for thirdQuery.Next() {
+						// Variable "option" has been initialized by assigning it to a "Option" struct.
+						var option models.Option
+
+						// Call "Scan()" function to the result set of the third SQL query.
+						if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Append the information about option to the array.
+						question.Options = append(question.Options, option)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					thirdQuery.Close()
+
+					// Append information about question to the array.
+					survey.Questions = append(survey.Questions, question)
+				}
+
+				// Call "Close" function to the result set of the second SQL query.
+				secondQuery.Close()
+
+				// Append information about survey to the array.
+				surveys = append(surveys, survey)
+			}
+		} else if len(control) != 0 && len(email) != 0 {
+			// Execute the SQL query to get all surveys.
+			firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONTROL = $1 AND EMAIL = $2 ORDER BY CREATED_AT DESC;", control, email); if err != nil {
+				log.Println(err)
+				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+				return
+			}
+
+			// Call "Close" function to the result set of the first SQL query.
+			defer firstQuery.Close()
+
+			// Parse the result set of the first SQL query.
+			for firstQuery.Next() {
+				// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+				var survey models.AlphaSurvey
+
+				// Call "Scan()" function to the result set of the first SQL query.
+				if err := firstQuery.Scan(&survey.ID,
+					&survey.Name,
+					&survey.Description,
+					&survey.Category,
+					&survey.Condition,
+					&survey.Mark,
+					&survey.Control,
+					&survey.StartPeriod,
+					&survey.EndPeriod,
+					&survey.CreatedAt,
+					&survey.UpdatedAt,
+					&survey.Email,
+					&survey.Blocked,
+					&survey.TotalRespondents,
+					&survey.PastRespondents); err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Execute the SQL query to get all question.
+				secondQuery, err := database.DBSQL.Query(`SELECT
+					QUESTIONS.ID,
+					QUESTIONS.TEXT,
+					QUESTIONS.WIDGET,
+					QUESTIONS.REQUIRED,
+					QUESTIONS.POSITION
+				FROM SURVEYS_QUESTIONS_RELATIONSHIP
+				INNER JOIN QUESTIONS
+				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+				WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Parse the result set of the second SQL query.
+				for secondQuery.Next() {
+					// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+					var question models.AlphaQuestion
+
+					// Call "Scan()" function to the result set of the second SQL query.
+					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute SQL query to get information about all options of the specific question.
+					thirdQuery, err := database.DBSQL.Query(`SELECT
+						OPTIONS.ID,
+						OPTIONS.TEXT,
+       					OPTIONS.POSITION
+					FROM QUESTIONS_OPTIONS_RELATIONSHIP
+					INNER JOIN OPTIONS
+					ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+					WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the third SQL query.
+					for thirdQuery.Next() {
+						// Variable "option" has been initialized by assigning it to a "Option" struct.
+						var option models.Option
+
+						// Call "Scan()" function to the result set of the third SQL query.
+						if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Append the information about option to the array.
+						question.Options = append(question.Options, option)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					thirdQuery.Close()
+
+					// Append information about question to the array.
+					survey.Questions = append(survey.Questions, question)
+				}
+
+				// Call "Close" function to the result set of the second SQL query.
+				secondQuery.Close()
+
+				// Append information about survey to the array.
+				surveys = append(surveys, survey)
+			}
+		} else if len(categoryIdentifier) != 0 {
+			// Execute the SQL query to get all surveys.
+			firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 ORDER BY CREATED_AT DESC;", categoryIdentifier); if err != nil {
+				log.Println(err)
+				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+				return
+			}
+
+			// Call "Close" function to the result set of the first SQL query.
+			defer firstQuery.Close()
+
+			// Parse the result set of the first SQL query.
+			for firstQuery.Next() {
+				// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+				var survey models.AlphaSurvey
+
+				// Call "Scan()" function to the result set of the first SQL query.
+				if err := firstQuery.Scan(&survey.ID,
+					&survey.Name,
+					&survey.Description,
+					&survey.Category,
+					&survey.Condition,
+					&survey.Mark,
+					&survey.Control,
+					&survey.StartPeriod,
+					&survey.EndPeriod,
+					&survey.CreatedAt,
+					&survey.UpdatedAt,
+					&survey.Email,
+					&survey.Blocked,
+					&survey.TotalRespondents,
+					&survey.PastRespondents); err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Execute the SQL query to get all question.
+				secondQuery, err := database.DBSQL.Query(`SELECT
+					QUESTIONS.ID,
+					QUESTIONS.TEXT,
+					QUESTIONS.WIDGET,
+					QUESTIONS.REQUIRED,
+					QUESTIONS.POSITION
+				FROM SURVEYS_QUESTIONS_RELATIONSHIP
+				INNER JOIN QUESTIONS
+				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+				WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Parse the result set of the second SQL query.
+				for secondQuery.Next() {
+					// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+					var question models.AlphaQuestion
+
+					// Call "Scan()" function to the result set of the second SQL query.
+					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute SQL query to get information about all options of the specific question.
+					thirdQuery, err := database.DBSQL.Query(`SELECT
+						OPTIONS.ID,
+						OPTIONS.TEXT,
+       					OPTIONS.POSITION
+					FROM QUESTIONS_OPTIONS_RELATIONSHIP
+					INNER JOIN OPTIONS
+					ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+					WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the third SQL query.
+					for thirdQuery.Next() {
+						// Variable "option" has been initialized by assigning it to a "Option" struct.
+						var option models.Option
+
+						// Call "Scan()" function to the result set of the third SQL query.
+						if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Append the information about option to the array.
+						question.Options = append(question.Options, option)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					thirdQuery.Close()
+
+					// Append information about question to the array.
+					survey.Questions = append(survey.Questions, question)
+				}
+
+				// Call "Close" function to the result set of the second SQL query.
+				secondQuery.Close()
+
+				// Append information about survey to the array.
+				surveys = append(surveys, survey)
+			}
+		} else if len(conditionIdentifier) != 0 {
+			if conditionIdentifier == "1" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 ORDER BY CREATED_AT DESC;", conditionIdentifier); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "2" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 ORDER BY START_PERIOD DESC;", conditionIdentifier); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else if conditionIdentifier == "3" {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 ORDER BY END_PERIOD DESC;", conditionIdentifier); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			} else {
+				// Execute the SQL query to get all surveys.
+				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 ORDER BY CREATED_AT DESC;", conditionIdentifier); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Call "Close" function to the result set of the first SQL query.
+				defer firstQuery.Close()
+
+				// Parse the result set of the first SQL query.
+				for firstQuery.Next() {
+					// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+					var survey models.AlphaSurvey
+
+					// Call "Scan()" function to the result set of the first SQL query.
+					if err := firstQuery.Scan(&survey.ID,
+						&survey.Name,
+						&survey.Description,
+						&survey.Category,
+						&survey.Condition,
+						&survey.Mark,
+						&survey.Control,
+						&survey.StartPeriod,
+						&survey.EndPeriod,
+						&survey.CreatedAt,
+						&survey.UpdatedAt,
+						&survey.Email,
+						&survey.Blocked,
+						&survey.TotalRespondents,
+						&survey.PastRespondents); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute the SQL query to get all question.
+					secondQuery, err := database.DBSQL.Query(`SELECT
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the second SQL query.
+					for secondQuery.Next() {
+						// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+						var question models.AlphaQuestion
+
+						// Call "Scan()" function to the result set of the second SQL query.
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Execute SQL query to get information about all options of the specific question.
+						thirdQuery, err := database.DBSQL.Query(`SELECT
+							OPTIONS.ID,
+							OPTIONS.TEXT,
+       						OPTIONS.POSITION
+						FROM QUESTIONS_OPTIONS_RELATIONSHIP
+						INNER JOIN OPTIONS
+						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Parse the result set of the third SQL query.
+						for thirdQuery.Next() {
+							// Variable "option" has been initialized by assigning it to a "Option" struct.
+							var option models.Option
+
+							// Call "Scan()" function to the result set of the third SQL query.
+							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+								log.Println(err)
+								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+								return
+							}
+
+							// Append the information about option to the array.
+							question.Options = append(question.Options, option)
+						}
+
+						// Call "Close" function to the result set of the second SQL query.
+						thirdQuery.Close()
+
+						// Append information about question to the array.
+						survey.Questions = append(survey.Questions, question)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					secondQuery.Close()
+
+					// Append information about survey to the array.
+					surveys = append(surveys, survey)
+				}
+			}
+		} else if len(mark) != 0 {
+			// Execute the SQL query to get all surveys.
+			firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE MARK = $1 ORDER BY CREATED_AT DESC;", mark); if err != nil {
+				log.Println(err)
+				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+				return
+			}
+
+			// Call "Close" function to the result set of the first SQL query.
+			defer firstQuery.Close()
+
+			// Parse the result set of the first SQL query.
+			for firstQuery.Next() {
+				// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+				var survey models.AlphaSurvey
+
+				// Call "Scan()" function to the result set of the first SQL query.
+				if err := firstQuery.Scan(&survey.ID,
+					&survey.Name,
+					&survey.Description,
+					&survey.Category,
+					&survey.Condition,
+					&survey.Mark,
+					&survey.Control,
+					&survey.StartPeriod,
+					&survey.EndPeriod,
+					&survey.CreatedAt,
+					&survey.UpdatedAt,
+					&survey.Email,
+					&survey.Blocked,
+					&survey.TotalRespondents,
+					&survey.PastRespondents); err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Execute the SQL query to get all question.
+				secondQuery, err := database.DBSQL.Query(`SELECT
+					QUESTIONS.ID,
+					QUESTIONS.TEXT,
+					QUESTIONS.WIDGET,
+					QUESTIONS.REQUIRED,
+					QUESTIONS.POSITION
+				FROM SURVEYS_QUESTIONS_RELATIONSHIP
+				INNER JOIN QUESTIONS
+				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+				WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Parse the result set of the second SQL query.
+				for secondQuery.Next() {
+					// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+					var question models.AlphaQuestion
+
+					// Call "Scan()" function to the result set of the second SQL query.
+					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute SQL query to get information about all options of the specific question.
+					thirdQuery, err := database.DBSQL.Query(`SELECT
+						OPTIONS.ID,
+						OPTIONS.TEXT,
+       					OPTIONS.POSITION
+					FROM QUESTIONS_OPTIONS_RELATIONSHIP
+					INNER JOIN OPTIONS
+					ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+					WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the third SQL query.
+					for thirdQuery.Next() {
+						// Variable "option" has been initialized by assigning it to a "Option" struct.
+						var option models.Option
+
+						// Call "Scan()" function to the result set of the third SQL query.
+						if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Append the information about option to the array.
+						question.Options = append(question.Options, option)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					thirdQuery.Close()
+
+					// Append information about question to the array.
+					survey.Questions = append(survey.Questions, question)
+				}
+
+				// Call "Close" function to the result set of the second SQL query.
+				secondQuery.Close()
+
+				// Append information about survey to the array.
+				surveys = append(surveys, survey)
+			}
+		} else if len(control) != 0 {
+			// Execute the SQL query to get all surveys.
+			firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONTROL = $1 ORDER BY CREATED_AT DESC;", control); if err != nil {
+				log.Println(err)
+				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+				return
+			}
+
+			// Call "Close" function to the result set of the first SQL query.
+			defer firstQuery.Close()
+
+			// Parse the result set of the first SQL query.
+			for firstQuery.Next() {
+				// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+				var survey models.AlphaSurvey
+
+				// Call "Scan()" function to the result set of the first SQL query.
+				if err := firstQuery.Scan(&survey.ID,
+					&survey.Name,
+					&survey.Description,
+					&survey.Category,
+					&survey.Condition,
+					&survey.Mark,
+					&survey.Control,
+					&survey.StartPeriod,
+					&survey.EndPeriod,
+					&survey.CreatedAt,
+					&survey.UpdatedAt,
+					&survey.Email,
+					&survey.Blocked,
+					&survey.TotalRespondents,
+					&survey.PastRespondents); err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Execute the SQL query to get all question.
+				secondQuery, err := database.DBSQL.Query(`SELECT
+					QUESTIONS.ID,
+					QUESTIONS.TEXT,
+					QUESTIONS.WIDGET,
+					QUESTIONS.REQUIRED,
+					QUESTIONS.POSITION
+				FROM SURVEYS_QUESTIONS_RELATIONSHIP
+				INNER JOIN QUESTIONS
+				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+				WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Parse the result set of the second SQL query.
+				for secondQuery.Next() {
+					// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+					var question models.AlphaQuestion
+
+					// Call "Scan()" function to the result set of the second SQL query.
+					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute SQL query to get information about all options of the specific question.
+					thirdQuery, err := database.DBSQL.Query(`SELECT
+						OPTIONS.ID,
+						OPTIONS.TEXT,
+       					OPTIONS.POSITION
+					FROM QUESTIONS_OPTIONS_RELATIONSHIP
+					INNER JOIN OPTIONS
+					ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+					WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the third SQL query.
+					for thirdQuery.Next() {
+						// Variable "option" has been initialized by assigning it to a "Option" struct.
+						var option models.Option
+
+						// Call "Scan()" function to the result set of the third SQL query.
+						if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Append the information about option to the array.
+						question.Options = append(question.Options, option)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					thirdQuery.Close()
+
+					// Append information about question to the array.
+					survey.Questions = append(survey.Questions, question)
+				}
+
+				// Call "Close" function to the result set of the second SQL query.
+				secondQuery.Close()
+
+				// Append information about survey to the array.
+				surveys = append(surveys, survey)
+			}
+		} else if len(email) != 0 {
+			// Execute the SQL query to get all surveys.
+			firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE EMAIL = $1 ORDER BY CREATED_AT DESC;", email); if err != nil {
+				log.Println(err)
+				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+				return
+			}
+
+			// Call "Close" function to the result set of the first SQL query.
+			defer firstQuery.Close()
+
+			// Parse the result set of the first SQL query.
+			for firstQuery.Next() {
+				// Variable "survey" has been initialized by assigning it to a "AlphaSurvey" struct.
+				var survey models.AlphaSurvey
+
+				// Call "Scan()" function to the result set of the first SQL query.
+				if err := firstQuery.Scan(&survey.ID,
+					&survey.Name,
+					&survey.Description,
+					&survey.Category,
+					&survey.Condition,
+					&survey.Mark,
+					&survey.Control,
+					&survey.StartPeriod,
+					&survey.EndPeriod,
+					&survey.CreatedAt,
+					&survey.UpdatedAt,
+					&survey.Email,
+					&survey.Blocked,
+					&survey.TotalRespondents,
+					&survey.PastRespondents); err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Execute the SQL query to get all question.
+				secondQuery, err := database.DBSQL.Query(`SELECT
+					QUESTIONS.ID,
+					QUESTIONS.TEXT,
+					QUESTIONS.WIDGET,
+					QUESTIONS.REQUIRED,
+					QUESTIONS.POSITION
+				FROM SURVEYS_QUESTIONS_RELATIONSHIP
+				INNER JOIN QUESTIONS
+				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+				WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Parse the result set of the second SQL query.
+				for secondQuery.Next() {
+					// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+					var question models.AlphaQuestion
+
+					// Call "Scan()" function to the result set of the second SQL query.
+					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Execute SQL query to get information about all options of the specific question.
+					thirdQuery, err := database.DBSQL.Query(`SELECT
+						OPTIONS.ID,
+						OPTIONS.TEXT,
+       					OPTIONS.POSITION
+					FROM QUESTIONS_OPTIONS_RELATIONSHIP
+					INNER JOIN OPTIONS
+					ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+					WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Parse the result set of the third SQL query.
+					for thirdQuery.Next() {
+						// Variable "option" has been initialized by assigning it to a "Option" struct.
+						var option models.Option
+
+						// Call "Scan()" function to the result set of the third SQL query.
+						if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+							log.Println(err)
+							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+							return
+						}
+
+						// Append the information about option to the array.
+						question.Options = append(question.Options, option)
+					}
+
+					// Call "Close" function to the result set of the second SQL query.
+					thirdQuery.Close()
+
+					// Append information about question to the array.
+					survey.Questions = append(survey.Questions, question)
+				}
+
+				// Call "Close" function to the result set of the second SQL query.
+				secondQuery.Close()
+
+				// Append information about survey to the array.
+				surveys = append(surveys, survey)
+			}
+		} else {
+			utils.ResponseWithError(responseWriter, http.StatusBadRequest, "http.StatusBadRequest")
+			return
+		}
+	}
+
+	// Check the length of the array.
+	if len(surveys) == 0 {
+		utils.Response(responseWriter, http.StatusOK, nil)
+		return
+	}
+
+	// Send JSON response with status code "200".
+	utils.Response(responseWriter, http.StatusOK, surveys)
+}
+
 var GetBetaSurveys = func(responseWriter http.ResponseWriter, request *http.Request) {
 	// Variable has been initialized by assigning it a array.
 	var surveys []models.BetaSurvey
@@ -640,6 +9352,93 @@ var GetBetaSurveys = func(responseWriter http.ResponseWriter, request *http.Requ
 
 	// Send JSON response with status code "200".
 	utils.Response(responseWriter, http.StatusOK, surveys)
+}
+
+var GetAlphaSurvey = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Take variable from path with the help of "Gorilla Mux" library.
+	// The most common numeric conversions are Atoi (string to int) and Itoa (int to string).
+	surveyIdentifier := mux.Vars(request)["survey_id"]
+
+	// Variable has been initialized by assigning it to a "AlphaSurvey" struct.
+	survey := models.AlphaSurvey{}
+
+	// CRUD interface of "GORM" ORM library to find entry by unique identifier.
+	if err := database.DBGORM.Where("ID = ?", surveyIdentifier).Find(&survey).Error; err != nil {
+		log.Println(err)
+		utils.ResponseWithError(responseWriter, http.StatusNotFound, "http.StatusNotFound")
+		return
+	}
+
+	// Execute the SQL query to get all question.
+	firstQuery, err := database.DBSQL.Query(`SELECT
+		QUESTIONS.ID,
+		QUESTIONS.TEXT,
+		QUESTIONS.WIDGET,
+		QUESTIONS.REQUIRED,
+		QUESTIONS.POSITION
+	FROM SURVEYS_QUESTIONS_RELATIONSHIP
+	INNER JOIN QUESTIONS
+	ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+	WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, surveyIdentifier); if err != nil {
+		log.Println(err)
+		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// Call "Close" function to the result set of the first SQL query.
+	defer firstQuery.Close()
+
+	// Parse the result set of the first SQL query.
+	for firstQuery.Next() {
+		// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+		var question models.AlphaQuestion
+
+		// Call "Scan()" function to the result set of the second SQL query.
+		if err := firstQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+			log.Println(err)
+			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		// Execute SQL query to get information about all options of the specific question.
+		secondQuery, err := database.DBSQL.Query(`SELECT
+				OPTIONS.ID,
+				OPTIONS.TEXT,
+       			OPTIONS.POSITION
+			FROM QUESTIONS_OPTIONS_RELATIONSHIP
+			INNER JOIN OPTIONS
+			ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+			WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+			log.Println(err)
+			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		// Parse the result set of the second SQL query.
+		for secondQuery.Next() {
+			// Variable "option" has been initialized by assigning it to a "Option" struct.
+			var option models.Option
+
+			// Call "Scan()" function to the result set of the second SQL query.
+			if err := secondQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+				log.Println(err)
+				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+				return
+			}
+
+			// Append the information about option to the array.
+			question.Options = append(question.Options, option)
+		}
+
+		// Call "Close" function to the result set of the second SQL query.
+		secondQuery.Close()
+
+		// Append information about question to the array.
+		survey.Questions = append(survey.Questions, question)
+	}
+
+	// Send JSON response with status code "200".
+	utils.Response(responseWriter, http.StatusOK, survey)
 }
 
 var GetBetaSurvey = func(responseWriter http.ResponseWriter, request *http.Request) {

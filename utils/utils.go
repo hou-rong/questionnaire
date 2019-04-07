@@ -106,3 +106,21 @@ func ConvertStringArrayToString(input []string) string {
 	}
 	return output.String()
 }
+
+/*
+Function name:
+"ConvertBooleanArrayToString".
+
+Function description:
+The main task of the function is to convert boolean array to string separated by ','.
+*/
+func ConvertBooleanArrayToString(input []bool) string {
+	var output strings.Builder
+	for i := 0; i < len(input); i++ {
+		output.WriteString(strconv.FormatBool(input[i]))
+		if i < len(input) - 1 {
+			output.WriteString(",")
+		}
+	}
+	return output.String()
+}

@@ -67,6 +67,7 @@ var CreateMultipleSurveyFactorRelationship = func(responseWriter http.ResponseWr
 	sqlStatement.WriteString("' SURVEY_ID, FACTOR_ID FROM UNNEST(ARRAY[")
 	sqlStatement.WriteString(utils.ConvertIntArrayToString(requestBody.Factors))
 	sqlStatement.WriteString("]) FACTOR_ID")
+	sqlStatement.WriteString(" ON CONFLICT ON CONSTRAINT SURVEYS_FACTORS_RELATIONSHIP_UNIQUE_KEY DO NOTHING")
 
 	// Make SQL query by "database/sql" package.
 	_, err := database.DBSQL.Exec(sqlStatement.String()); if err != nil {
@@ -204,4 +205,78 @@ var GetBetaSurveysFactorsRelationship = func(responseWriter http.ResponseWriter,
 
 	// Send JSON response with status code "200".
 	utils.Response(responseWriter, http.StatusOK, factors)
+}
+
+var CheckSurveyFactorRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Initialize "Result" struct.
+	type Result struct {
+		ID string `gorm:"primary_key" json:"survey_id"`
+		Name *string `json:"survey_name"`
+		Email *string `json:"email"`
+	}
+
+	// Variable has been initialized by assigning it a array.
+	var results []Result
+
+	// Variable has been initialized by assigning it a array of URL parameters from the request.
+	keys := request.URL.Query()
+
+	// Check if an array contains any element.
+	if len(keys) > 0 {
+		// Variable has been initialized by assigning it a unique identifier of factor.
+		factorIdentifier := keys.Get("factor_id")
+
+		// Check the value of the variables.
+		if len(factorIdentifier) != 0 {
+			// Execute SQL query by "database/sql" package.
+			rows, err := database.DBSQL.Query(`SELECT
+       			ID,
+       			NAME,
+       			EMAIL
+			FROM SURVEYS
+			INNER JOIN SURVEYS_FACTORS_RELATIONSHIP
+			ON SURVEYS.ID = SURVEYS_FACTORS_RELATIONSHIP.SURVEY_ID
+			WHERE SURVEYS_FACTORS_RELATIONSHIP.FACTOR_ID = $1
+			AND SURVEYS.CONDITION = 2
+			AND SURVEYS.BLOCKED = true
+			GROUP BY ID;`, factorIdentifier); if err != nil {
+				log.Println(err)
+				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+				return
+			}
+
+			// Call "Close" function.
+			defer rows.Close()
+
+			// Parse the result set of the SQL query.
+			for rows.Next() {
+				var result Result
+
+				// Call "Scan()" function to the result set of the second SQL query.
+				if err := rows.Scan(&result.ID, &result.Name, &result.Email); err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Append result to the final array.
+				results = append(results, result)
+			}
+		} else {
+			utils.ResponseWithError(responseWriter, http.StatusBadRequest, "http.StatusBadRequest")
+			return
+		}
+	} else {
+		utils.ResponseWithError(responseWriter, http.StatusBadRequest, "http.StatusBadRequest")
+		return
+	}
+
+	// Check the length of the array.
+	if len(results) == 0 {
+		utils.Response(responseWriter, http.StatusOK, nil)
+		return
+	}
+
+	// Send JSON response with status code "200".
+	utils.Response(responseWriter, http.StatusOK, results)
 }

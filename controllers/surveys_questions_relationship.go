@@ -66,6 +66,7 @@ var CreateMultipleSurveyQuestionRelationship = func(responseWriter http.Response
 	sqlStatement.WriteString("' SURVEY_ID, QUESTION_ID FROM UNNEST(ARRAY[")
 	sqlStatement.WriteString(utils.ConvertIntArrayToString(requestBody.Questions))
 	sqlStatement.WriteString("]) QUESTION_ID")
+	sqlStatement.WriteString(" ON CONFLICT ON CONSTRAINT SURVEYS_QUESTIONS_RELATIONSHIP_UNIQUE_KEY DO NOTHING")
 
 	// Make SQL query by "database/sql" package.
 	_, err := database.DBSQL.Exec(sqlStatement.String()); if err != nil {

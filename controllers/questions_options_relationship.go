@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"github.com/lib/pq"
 	"log"
 	"net/http"
 	"questionnaire/database"
@@ -11,7 +12,7 @@ import (
 	"strings"
 )
 
-var CreateSingleQuestionOptionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+var CreateSingleIntQuestionOptionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
 	// Variable has been initialized by assigning it a "QuestionOptionRelationship" struct.
 	questionOptionRelationship := models.QuestionOptionRelationship{}
 
@@ -40,7 +41,7 @@ var CreateSingleQuestionOptionRelationship = func(responseWriter http.ResponseWr
 	utils.ResponseWithSuccess(responseWriter, http.StatusCreated, "http.StatusCreated")
 }
 
-var CreateMultipleQuestionOptionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+var CreateMultipleIntQuestionOptionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
 	// Initialize "RequestBody" struct.
 	type RequestBody struct {
 		QuestionID int `json:"question_id"`
@@ -68,6 +69,7 @@ var CreateMultipleQuestionOptionRelationship = func(responseWriter http.Response
 	sqlStatement.WriteString(" QUESTION_ID, OPTION_ID FROM UNNEST(ARRAY[")
 	sqlStatement.WriteString(utils.ConvertIntArrayToString(requestBody.Options))
 	sqlStatement.WriteString("]) OPTION_ID")
+	sqlStatement.WriteString(" ON CONFLICT ON CONSTRAINT QUESTIONS_OPTIONS_RELATIONSHIP_UNIQUE_KEY DO NOTHING")
 
 	// Make SQL query by "database/sql" package.
 	_, err := database.DBSQL.Exec(sqlStatement.String()); if err != nil {
@@ -80,7 +82,64 @@ var CreateMultipleQuestionOptionRelationship = func(responseWriter http.Response
 	utils.ResponseWithSuccess(responseWriter, http.StatusCreated, "http.StatusCreated")
 }
 
-var DeleteSingleQuestionOptionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+var CreateMultipleTextQuestionOptionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Initialize "RequestBody" struct.
+	type RequestBody struct {
+		QuestionID int `json:"question_id"`
+		Options [] struct {
+			Text string `json:"option_text"`
+		} `json:"options"`
+	}
+
+	// Variable has been initialized by assigning it a "RequestBody" struct.
+	requestBody := RequestBody{}
+
+	// "NewDecoder" returns a new decoder that reads from request body.
+	// The decoder introduces its own buffering and may read data from request body beyond the JSON values requested.
+	decoder := json.NewDecoder(request.Body)
+
+	// Decode reads the JSON value from its input and stores it in the value pointed to by "&requestBody".
+	if err := decoder.Decode(&requestBody); err != nil {
+		log.Println(err)
+		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// Initialize several arrays which would be used in string builder.
+	var textArray []string
+	var positionArray []int
+
+	// Parse content of the request body.
+	for i := 0; i < len(requestBody.Options); i++ {
+		textArray = append(textArray, requestBody.Options[i].Text)
+		positionArray = append(positionArray, i)
+	}
+
+	// Build SQL statement.
+	var sqlStatement strings.Builder
+	sqlStatement.WriteString("SELECT ARRAY_AGG(RESULTS.ID) FROM alexa (")
+	sqlStatement.WriteString(strconv.Itoa(requestBody.QuestionID))
+	sqlStatement.WriteString(", ARRAY[")
+	sqlStatement.WriteString(utils.ConvertStringArrayToString(textArray))
+	sqlStatement.WriteString("], ARRAY[")
+	sqlStatement.WriteString(utils.ConvertIntArrayToString(positionArray))
+	sqlStatement.WriteString("]) RESULTS(ID);")
+
+	// Variable has been initialized by assigning it a array.
+	var optionsIdentifiers pq.Int64Array
+
+	// Execute SQL query by "database/sql" package.
+	if err := database.DBSQL.QueryRow(sqlStatement.String()).Scan(&optionsIdentifiers); err != nil {
+		log.Println(err)
+		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// Send successful response with status code "200" and array of ids.
+	utils.Response(responseWriter, http.StatusOK, map[string]pq.Int64Array{"options": optionsIdentifiers})
+}
+
+var DeleteSingleIntQuestionOptionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
 	// Variable has been initialized by assigning it a array of URL parameters from the request.
 	keys := request.URL.Query()
 
@@ -116,7 +175,7 @@ var DeleteSingleQuestionOptionRelationship = func(responseWriter http.ResponseWr
 	utils.ResponseWithSuccess(responseWriter, http.StatusOK, "http.StatusOK")
 }
 
-var DeleteMultipleQuestionOptionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+var DeleteMultipleIntQuestionOptionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
 	// Variable has been initialized by assigning it a array of URL parameters from the request.
 	keys := request.URL.Query()
 
