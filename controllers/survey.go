@@ -8,6 +8,7 @@ import (
 	"questionnaire/database"
 	"questionnaire/models"
 	"questionnaire/utils"
+	"time"
 )
 
 var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Request) {
@@ -9439,6 +9440,124 @@ var GetAlphaSurvey = func(responseWriter http.ResponseWriter, request *http.Requ
 
 	// Send JSON response with status code "200".
 	utils.Response(responseWriter, http.StatusOK, survey)
+}
+
+var GetAvailableSurvey = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Variable has been initialized by assigning it to a "AlphaSurvey" struct.
+	survey := models.AlphaSurvey{}
+
+	// Variable has been initialized by assigning it a "SurveyEmployeeRelationship" struct.
+	surveyEmployeeRelationship := models.SurveyEmployeeRelationship{}
+
+	// Variable has been initialized by assigning it a array of URL parameters from the request.
+	keys := request.URL.Query()
+
+	// Check if an array contains any element.
+	if len(keys) != 0 {
+		// Variable has been initialized by assigning it a unique identifier of survey.
+		surveyIdentifier := keys.Get("survey_id")
+
+		// Variable has been initialized by assigning it a unique email.
+		email := keys.Get("email")
+
+		// Check key availability.
+		if len(surveyIdentifier) != 0 && len(email) != 0 {
+			// Check availability of the survey in the PostgreSQL database.
+			if err := database.DBGORM.Where("ID = ?", surveyIdentifier).Find(&survey).Error; err != nil {
+				utils.ResponseWithSuccess(responseWriter, http.StatusOK, "Survey not found.")
+				return
+			}
+
+			// Проверка срока прохождения опроса.
+			if survey.EndPeriod.Equal(time.Now()) || survey.EndPeriod.Before(time.Now()) {
+				utils.ResponseWithSuccess(responseWriter, http.StatusOK, "The survey timed out.")
+				return
+			}
+
+			// Check if the survey is available to the employee.
+			if err := database.DBGORM.Where("SURVEY_ID = ? AND EMPLOYEE = ? AND STATUS = FALSE", surveyIdentifier, email).Find(&surveyEmployeeRelationship).Error; err != nil {
+				utils.ResponseWithSuccess(responseWriter, http.StatusOK, "The survey is not available to the employee.")
+				return
+			}
+
+			// Execute the SQL query to get all question.
+			firstQuery, err := database.DBSQL.Query(`SELECT
+				QUESTIONS.ID,
+				QUESTIONS.TEXT,
+				QUESTIONS.WIDGET,
+				QUESTIONS.REQUIRED,
+				QUESTIONS.POSITION
+			FROM SURVEYS_QUESTIONS_RELATIONSHIP
+			INNER JOIN QUESTIONS
+			ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+			WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, surveyIdentifier); if err != nil {
+				log.Println(err)
+				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+				return
+			}
+
+			// Call "Close" function to the result set of the first SQL query.
+			defer firstQuery.Close()
+
+			// Parse the result set of the first SQL query.
+			for firstQuery.Next() {
+				// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+				var question models.AlphaQuestion
+
+				// Call "Scan()" function to the result set of the second SQL query.
+				if err := firstQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Execute SQL query to get information about all options of the specific question.
+				secondQuery, err := database.DBSQL.Query(`SELECT
+					OPTIONS.ID,
+				  	OPTIONS.TEXT,
+       				OPTIONS.POSITION
+				FROM QUESTIONS_OPTIONS_RELATIONSHIP
+				INNER JOIN OPTIONS
+				ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+				WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Parse the result set of the second SQL query.
+				for secondQuery.Next() {
+					// Variable "option" has been initialized by assigning it to a "Option" struct.
+					var option models.Option
+
+					// Call "Scan()" function to the result set of the second SQL query.
+					if err := secondQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+						log.Println(err)
+						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+						return
+					}
+
+					// Append the information about option to the array.
+					question.Options = append(question.Options, option)
+				}
+
+				// Call "Close" function to the result set of the second SQL query.
+				secondQuery.Close()
+
+				// Append information about question to the array.
+				survey.Questions = append(survey.Questions, question)
+			}
+
+			// Send JSON response with status code "200".
+			utils.Response(responseWriter, http.StatusOK, survey)
+		} else {
+			utils.ResponseWithError(responseWriter, http.StatusBadRequest, "http.StatusBadRequest")
+			return
+		}
+	} else {
+		utils.ResponseWithError(responseWriter, http.StatusBadRequest, "http.StatusBadRequest")
+		return
+	}
 }
 
 var GetBetaSurvey = func(responseWriter http.ResponseWriter, request *http.Request) {
