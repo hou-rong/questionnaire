@@ -59,6 +59,6 @@ func main()  {
 		return
 	}
 
-	// The application is starting to listen and serving the RESTful web service with CORS options.
+	// The application is starting to listen and serving the web service with CORS options.
 	log.Fatal(http.ListenAndServe(":" + port, handlers.CORS(headers, methods, origins)(router)))
 }
