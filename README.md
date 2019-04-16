@@ -58,7 +58,7 @@ SELECT MAX(id) FROM questions;
 
 SELECT nextval('questions_id_seq');
 
-SELECT setval('questions_id_seq', (SELECT MAX(id) FROM options) + 1);
+SELECT setval('questions_id_seq', (SELECT MAX(id) FROM questions) + 1);
 ```
 
 `СHECK_FOR_UPDATES_IN_SURVEYS` trigger:
