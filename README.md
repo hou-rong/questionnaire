@@ -220,7 +220,7 @@ List of all available sql queries of the project you can easily find in `queries
 
 # Production
 
-Inside `build.sh` file you can notice the instruction which you can use to create the `docker image`:
+Inside `production.sh` file you can notice the instruction which you can use to create the `docker image`:
 ```
 docker build -t questionnaire_image .
 ```
@@ -273,9 +273,9 @@ ENV PORT=8000
 CMD ["./questionnaire"]
 ```
 
-Inside `run.sh` file you can notice the instruction which you can use to create the `docker container`:
+Inside `production.sh` file you can notice the instruction which you can use to create the `docker container`:
 ```
-docker run --name questionnaire_container -e TZ=Asia/Almaty -d -p 1000:8000 questionnaire_image
+docker run --name questionnaire_container -e TZ=Asia/Almaty -d -p 1001:8000 questionnaire_image
 ```
 
 # License
