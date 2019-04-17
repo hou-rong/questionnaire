@@ -44,7 +44,8 @@ var GetAlphaFactors = func(responseWriter http.ResponseWriter, request *http.Req
        		QUESTIONS.TEXT,
 			QUESTIONS.WIDGET,
        		QUESTIONS.REQUIRED,
-       		QUESTIONS.POSITION
+       		QUESTIONS.POSITION,
+       		QUESTIONS.CATEGORY
 		FROM FACTORS_QUESTIONS_RELATIONSHIP
 		INNER JOIN QUESTIONS
 		ON FACTORS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -60,7 +61,7 @@ var GetAlphaFactors = func(responseWriter http.ResponseWriter, request *http.Req
 			var question models.AlphaQuestion
 
 			// Call "Scan()" function to the result set of the second SQL query.
-			if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+			if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 				log.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
@@ -156,7 +157,8 @@ var GetAlphaFactor = func(responseWriter http.ResponseWriter, request *http.Requ
        		QUESTIONS.TEXT,
 			QUESTIONS.WIDGET,
        		QUESTIONS.REQUIRED,
-       		QUESTIONS.POSITION
+       		QUESTIONS.POSITION,
+       		QUESTIONS.CATEGORY
 		FROM FACTORS_QUESTIONS_RELATIONSHIP
 		INNER JOIN QUESTIONS
 		ON FACTORS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -175,7 +177,7 @@ var GetAlphaFactor = func(responseWriter http.ResponseWriter, request *http.Requ
 		var question models.AlphaQuestion
 
 		// Call "Scan()" function to the result set of the first SQL query.
-		if err := firstQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+		if err := firstQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 			log.Println(err)
 			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 			return

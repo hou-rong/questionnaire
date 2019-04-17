@@ -6,6 +6,7 @@ type AlphaQuestion struct {
 	Widget *int `json:"widget"`
 	Required *bool `json:"required"`
 	Position *int `json:"question_position"`
+	Category *int `json:"category"`
 	Options []Option `json:"options"`
 }
 
@@ -19,6 +20,7 @@ type BetaQuestion struct {
 	Widget *int `json:"widget"`
 	Required *bool `json:"required"`
 	Position *int `json:"question_position"`
+	Category *int `json:"category"`
 }
 
 func (BetaQuestion) TableName() string {

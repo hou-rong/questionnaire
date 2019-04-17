@@ -12,91 +12,193 @@ import (
 )
 
 var GetAlphaQuestions = func(responseWriter http.ResponseWriter, request *http.Request) {
-	// Variable "questions" has been initialized by assigning it to array of structures.
-	var questions []models.AlphaQuestion
+	// Variable has been initialized by assigning it a array of URL parameters from the request.
+	keys := request.URL.Query()
 
-	// Execute the SQL query to get all questions.
-	firstQuery, err := database.DBSQL.Query("SELECT * FROM questions;"); if err != nil {
-		log.Println(err)
-		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
-		return
-	}
+	// Check if an array contains any element.
+	if len(keys) != 0 {
+		// Variable has been initialized by assigning it a unique identifier of category.
+		categoryIdentifier := keys.Get("category_id")
 
-	// Call "Close" function to the result set of the first SQL query.
-	defer firstQuery.Close()
+		// Variable "questions" has been initialized by assigning it to array of structures.
+		var questions []models.AlphaQuestion
 
-	// Parse the result set of the first SQL query.
-	for firstQuery.Next() {
-		// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
-		var question models.AlphaQuestion
-
-		// Call "Scan()" function to the result set of the first SQL query.
-		if err := firstQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+		// Execute the SQL query to get all questions by unique identifier of category.
+		firstQuery, err := database.DBSQL.Query("SELECT ID, TEXT, WIDGET, REQUIRED, POSITION, CATEGORY FROM QUESTIONS WHERE CATEGORY = $1;", categoryIdentifier); if err != nil {
 			log.Println(err)
 			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 			return
 		}
 
-		// Execute the SQL query to get information about all options of the specific question.
-		secondQuery, err := database.DBSQL.Query(`SELECT
-			OPTIONS.ID,
-			OPTIONS.TEXT,
-       		OPTIONS.POSITION
-		FROM QUESTIONS_OPTIONS_RELATIONSHIP
-		INNER JOIN OPTIONS
-		ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
-		WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-			log.Println(err)
-			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
-			return
-		}
+		// Call "Close" function to the result set of the first SQL query.
+		defer firstQuery.Close()
 
-		// Parse the result set of the second SQL query.
-		for secondQuery.Next() {
-			// Variable "option" has been initialized by assigning it to a "Option" struct.
-			var option models.Option
+		// Parse the result set of the first SQL query.
+		for firstQuery.Next() {
+			// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+			var question models.AlphaQuestion
 
-			// Call "Scan()" function to the result set of the second SQL query.
-			if err := secondQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+			// Call "Scan()" function to the result set of the first SQL query.
+			if err := firstQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 				log.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
 
-			// Append information about option of the array.
-			question.Options = append(question.Options, option)
+			// Execute the SQL query to get information about all options of the specific question.
+			secondQuery, err := database.DBSQL.Query(`SELECT
+				OPTIONS.ID,
+				OPTIONS.TEXT,
+       			OPTIONS.POSITION
+			FROM QUESTIONS_OPTIONS_RELATIONSHIP
+			INNER JOIN OPTIONS
+			ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+			WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+				log.Println(err)
+				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+				return
+			}
+
+			// Parse the result set of the second SQL query.
+			for secondQuery.Next() {
+				// Variable "option" has been initialized by assigning it to a "Option" struct.
+				var option models.Option
+
+				// Call "Scan()" function to the result set of the second SQL query.
+				if err := secondQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Append information about option of the array.
+				question.Options = append(question.Options, option)
+			}
+
+			// Call "Close" function to the result set of the second SQL query.
+			secondQuery.Close()
+
+			// Append information about question to the array.
+			questions = append(questions, question)
 		}
 
-		// Call "Close" function to the result set of the second SQL query.
-		secondQuery.Close()
+		// Send JSON response with status code "200".
+		utils.Response(responseWriter, http.StatusOK, questions)
+	} else {
+		// Variable "questions" has been initialized by assigning it to array of structures.
+		var questions []models.AlphaQuestion
 
-		// Append information about question to the array.
-		questions = append(questions, question)
+		// Execute the SQL query to get all questions.
+		firstQuery, err := database.DBSQL.Query("SELECT ID, TEXT, WIDGET, REQUIRED, POSITION, CATEGORY FROM QUESTIONS;"); if err != nil {
+			log.Println(err)
+			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		// Call "Close" function to the result set of the first SQL query.
+		defer firstQuery.Close()
+
+		// Parse the result set of the first SQL query.
+		for firstQuery.Next() {
+			// Variable "question" has been initialized by assigning it to a "AlphaQuestion" struct.
+			var question models.AlphaQuestion
+
+			// Call "Scan()" function to the result set of the first SQL query.
+			if err := firstQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
+				log.Println(err)
+				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+				return
+			}
+
+			// Execute the SQL query to get information about all options of the specific question.
+			secondQuery, err := database.DBSQL.Query(`SELECT
+				OPTIONS.ID,
+				OPTIONS.TEXT,
+       			OPTIONS.POSITION
+			FROM QUESTIONS_OPTIONS_RELATIONSHIP
+			INNER JOIN OPTIONS
+			ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
+			WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
+				log.Println(err)
+				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+				return
+			}
+
+			// Parse the result set of the second SQL query.
+			for secondQuery.Next() {
+				// Variable "option" has been initialized by assigning it to a "Option" struct.
+				var option models.Option
+
+				// Call "Scan()" function to the result set of the second SQL query.
+				if err := secondQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
+					log.Println(err)
+					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+					return
+				}
+
+				// Append information about option of the array.
+				question.Options = append(question.Options, option)
+			}
+
+			// Call "Close" function to the result set of the second SQL query.
+			secondQuery.Close()
+
+			// Append information about question to the array.
+			questions = append(questions, question)
+		}
+
+		// Send JSON response with status code "200".
+		utils.Response(responseWriter, http.StatusOK, questions)
 	}
-
-	// Send JSON response with status code "200".
-	utils.Response(responseWriter, http.StatusOK, questions)
 }
 
 var GetBetaQuestions = func(responseWriter http.ResponseWriter, request *http.Request) {
-	// Variable has been initialized by assigning it a array.
-	var questions []models.BetaQuestion
+	// Variable has been initialized by assigning it a array of URL parameters from the request.
+	keys := request.URL.Query()
 
-	// CRUD interface of "GORM" ORM library to select all entries.
-	if err := database.DBGORM.Find(&questions).Error; err != nil {
-		log.Println(err)
-		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
-		return
+	// Check if an array contains any element.
+	if len(keys) != 0 {
+		// Variable has been initialized by assigning it a unique identifier of category.
+		categoryIdentifier := keys.Get("category_id")
+
+		// Variable has been initialized by assigning it a array.
+		var questions []models.BetaQuestion
+
+		// CRUD interface of "GORM" ORM library to select all entries by unique identifier of category.
+		if err := database.DBGORM.Where("CATEGORY = ?", categoryIdentifier).Find(&questions).Error; err != nil {
+			log.Println(err)
+			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		// Check the length of the array.
+		if len(questions) == 0 {
+			utils.Response(responseWriter, http.StatusOK, nil)
+			return
+		}
+
+		// Send JSON response with status code "200".
+		utils.Response(responseWriter, http.StatusOK, questions)
+	} else {
+		// Variable has been initialized by assigning it a array.
+		var questions []models.BetaQuestion
+
+		// CRUD interface of "GORM" ORM library to select all entries.
+		if err := database.DBGORM.Find(&questions).Error; err != nil {
+			log.Println(err)
+			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		// Check the length of the array.
+		if len(questions) == 0 {
+			utils.Response(responseWriter, http.StatusOK, nil)
+			return
+		}
+
+		// Send JSON response with status code "200".
+		utils.Response(responseWriter, http.StatusOK, questions)
 	}
-
-	// Check the length of the array.
-	if len(questions) == 0 {
-		utils.Response(responseWriter, http.StatusOK, nil)
-		return
-	}
-
-	// Send JSON response with status code "200".
-	utils.Response(responseWriter, http.StatusOK, questions)
 }
 
 var GetAlphaQuestion = func(responseWriter http.ResponseWriter, request *http.Request) {

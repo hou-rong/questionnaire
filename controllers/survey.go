@@ -62,7 +62,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 				QUESTIONS.TEXT,
 				QUESTIONS.WIDGET,
 				QUESTIONS.REQUIRED,
-				QUESTIONS.POSITION
+				QUESTIONS.POSITION,
+       			QUESTIONS.CATEGORY
 			FROM SURVEYS_QUESTIONS_RELATIONSHIP
 			INNER JOIN QUESTIONS
 			ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -78,7 +79,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 				var question models.AlphaQuestion
 
 				// Call "Scan()" function to the result set of the second SQL query.
-				if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+				if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 					log.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
@@ -187,7 +188,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+						QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -203,7 +205,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -295,7 +297,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -311,7 +314,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -403,7 +406,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -419,7 +423,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -511,7 +515,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -527,7 +532,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -621,7 +626,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -637,7 +643,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -729,7 +735,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -745,7 +752,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -837,7 +844,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -853,7 +861,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -945,7 +953,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -961,7 +970,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -1055,7 +1064,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -1071,7 +1081,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -1163,7 +1173,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -1179,7 +1190,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -1271,7 +1282,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -1287,7 +1299,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -1379,7 +1391,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -1395,7 +1408,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -1489,7 +1502,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -1505,7 +1519,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -1597,7 +1611,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -1613,7 +1628,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -1705,7 +1720,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -1721,7 +1737,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -1809,15 +1825,16 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 					// Execute the SQL query to get all question.
 					secondQuery, err := database.DBSQL.Query(`SELECT
-				QUESTIONS.ID,
-				QUESTIONS.TEXT,
-				QUESTIONS.WIDGET,
-				QUESTIONS.REQUIRED,
-				QUESTIONS.POSITION
-			FROM SURVEYS_QUESTIONS_RELATIONSHIP
-			INNER JOIN QUESTIONS
-			ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
-			WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
+						QUESTIONS.ID,
+						QUESTIONS.TEXT,
+						QUESTIONS.WIDGET,
+						QUESTIONS.REQUIRED,
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
+					FROM SURVEYS_QUESTIONS_RELATIONSHIP
+					INNER JOIN QUESTIONS
+					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
+					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
 						log.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
@@ -1829,7 +1846,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -1923,7 +1940,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -1939,7 +1957,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -2031,7 +2049,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -2047,7 +2066,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -2139,7 +2158,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -2155,7 +2175,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -2247,7 +2267,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -2263,7 +2284,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -2356,7 +2377,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					QUESTIONS.TEXT,
 					QUESTIONS.WIDGET,
 					QUESTIONS.REQUIRED,
-					QUESTIONS.POSITION
+					QUESTIONS.POSITION,
+       				QUESTIONS.CATEGORY
 				FROM SURVEYS_QUESTIONS_RELATIONSHIP
 				INNER JOIN QUESTIONS
 				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -2372,7 +2394,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					var question models.AlphaQuestion
 
 					// Call "Scan()" function to the result set of the second SQL query.
-					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 						log.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
@@ -2465,7 +2487,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -2481,7 +2504,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -2573,7 +2596,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -2589,7 +2613,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -2681,7 +2705,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -2697,7 +2722,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -2789,7 +2814,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -2805,7 +2831,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -2899,7 +2925,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -2915,7 +2942,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -3007,7 +3034,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -3023,7 +3051,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -3115,7 +3143,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -3131,7 +3160,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -3223,7 +3252,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -3239,7 +3269,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -3333,7 +3363,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -3349,7 +3380,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -3441,7 +3472,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -3457,7 +3489,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -3549,7 +3581,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -3565,7 +3598,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -3657,7 +3690,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -3673,7 +3707,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -3766,7 +3800,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					QUESTIONS.TEXT,
 					QUESTIONS.WIDGET,
 					QUESTIONS.REQUIRED,
-					QUESTIONS.POSITION
+					QUESTIONS.POSITION,
+       				QUESTIONS.CATEGORY
 				FROM SURVEYS_QUESTIONS_RELATIONSHIP
 				INNER JOIN QUESTIONS
 				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -3782,7 +3817,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					var question models.AlphaQuestion
 
 					// Call "Scan()" function to the result set of the second SQL query.
-					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 						log.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
@@ -3874,7 +3909,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					QUESTIONS.TEXT,
 					QUESTIONS.WIDGET,
 					QUESTIONS.REQUIRED,
-					QUESTIONS.POSITION
+					QUESTIONS.POSITION,
+       				QUESTIONS.CATEGORY
 				FROM SURVEYS_QUESTIONS_RELATIONSHIP
 				INNER JOIN QUESTIONS
 				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -3890,7 +3926,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					var question models.AlphaQuestion
 
 					// Call "Scan()" function to the result set of the second SQL query.
-					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 						log.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
@@ -3982,7 +4018,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					QUESTIONS.TEXT,
 					QUESTIONS.WIDGET,
 					QUESTIONS.REQUIRED,
-					QUESTIONS.POSITION
+					QUESTIONS.POSITION,
+       				QUESTIONS.CATEGORY
 				FROM SURVEYS_QUESTIONS_RELATIONSHIP
 				INNER JOIN QUESTIONS
 				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -3998,7 +4035,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					var question models.AlphaQuestion
 
 					// Call "Scan()" function to the result set of the second SQL query.
-					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 						log.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
@@ -4091,7 +4128,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -4107,7 +4145,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -4199,7 +4237,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -4215,7 +4254,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -4307,7 +4346,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -4323,7 +4363,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -4415,7 +4455,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -4431,7 +4472,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -4525,7 +4566,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -4541,7 +4583,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -4633,7 +4675,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -4649,7 +4692,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -4741,7 +4784,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -4757,7 +4801,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -4849,7 +4893,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -4865,7 +4910,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -4959,7 +5004,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 			  		FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -4975,7 +5021,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -5067,7 +5113,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -5083,7 +5130,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -5175,7 +5222,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -5191,7 +5239,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -5283,7 +5331,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -5299,7 +5348,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -5392,7 +5441,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 				FROM SURVEYS_QUESTIONS_RELATIONSHIP
 				INNER JOIN QUESTIONS
 				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -5408,7 +5458,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					var question models.AlphaQuestion
 
 					// Call "Scan()" function to the result set of the second SQL query.
-					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 						log.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
@@ -5501,7 +5551,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -5517,7 +5568,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -5609,7 +5660,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -5625,7 +5677,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -5717,7 +5769,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -5733,7 +5786,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -5825,7 +5878,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -5841,7 +5895,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -5934,7 +5988,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					QUESTIONS.TEXT,
 					QUESTIONS.WIDGET,
 					QUESTIONS.REQUIRED,
-					QUESTIONS.POSITION
+					QUESTIONS.POSITION,
+       				QUESTIONS.CATEGORY
 				FROM SURVEYS_QUESTIONS_RELATIONSHIP
 				INNER JOIN QUESTIONS
 				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -5950,7 +6005,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					var question models.AlphaQuestion
 
 					// Call "Scan()" function to the result set of the second SQL query.
-					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 						log.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
@@ -6042,7 +6097,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					QUESTIONS.TEXT,
 					QUESTIONS.WIDGET,
 					QUESTIONS.REQUIRED,
-					QUESTIONS.POSITION
+					QUESTIONS.POSITION,
+       				QUESTIONS.CATEGORY
 				FROM SURVEYS_QUESTIONS_RELATIONSHIP
 				INNER JOIN QUESTIONS
 				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -6058,7 +6114,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					var question models.AlphaQuestion
 
 					// Call "Scan()" function to the result set of the second SQL query.
-					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 						log.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
@@ -6150,7 +6206,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					QUESTIONS.TEXT,
 					QUESTIONS.WIDGET,
 					QUESTIONS.REQUIRED,
-					QUESTIONS.POSITION
+					QUESTIONS.POSITION,
+       				QUESTIONS.CATEGORY
 				FROM SURVEYS_QUESTIONS_RELATIONSHIP
 				INNER JOIN QUESTIONS
 				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -6166,7 +6223,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					var question models.AlphaQuestion
 
 					// Call "Scan()" function to the result set of the second SQL query.
-					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 						log.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
@@ -6259,7 +6316,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -6275,7 +6333,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -6367,7 +6425,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -6383,7 +6442,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -6475,7 +6534,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -6491,7 +6551,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -6583,7 +6643,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -6599,7 +6660,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -6693,7 +6754,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -6709,7 +6771,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -6801,7 +6863,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -6817,7 +6880,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -6909,7 +6972,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -6925,7 +6989,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -7017,7 +7081,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -7033,7 +7098,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -7127,7 +7192,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -7143,7 +7209,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -7235,7 +7301,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -7251,7 +7318,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -7343,7 +7410,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -7359,7 +7427,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -7451,7 +7519,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -7467,7 +7536,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -7560,7 +7629,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					QUESTIONS.TEXT,
 					QUESTIONS.WIDGET,
 					QUESTIONS.REQUIRED,
-					QUESTIONS.POSITION
+					QUESTIONS.POSITION,
+       				QUESTIONS.CATEGORY
 				FROM SURVEYS_QUESTIONS_RELATIONSHIP
 				INNER JOIN QUESTIONS
 				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -7576,7 +7646,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					var question models.AlphaQuestion
 
 					// Call "Scan()" function to the result set of the second SQL query.
-					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 						log.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
@@ -7668,7 +7738,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					QUESTIONS.TEXT,
 					QUESTIONS.WIDGET,
 					QUESTIONS.REQUIRED,
-					QUESTIONS.POSITION
+					QUESTIONS.POSITION,
+       				QUESTIONS.CATEGORY
 				FROM SURVEYS_QUESTIONS_RELATIONSHIP
 				INNER JOIN QUESTIONS
 				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -7684,7 +7755,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					var question models.AlphaQuestion
 
 					// Call "Scan()" function to the result set of the second SQL query.
-					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 						log.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
@@ -7776,7 +7847,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					QUESTIONS.TEXT,
 					QUESTIONS.WIDGET,
 					QUESTIONS.REQUIRED,
-					QUESTIONS.POSITION
+					QUESTIONS.POSITION,
+       				QUESTIONS.CATEGORY
 				FROM SURVEYS_QUESTIONS_RELATIONSHIP
 				INNER JOIN QUESTIONS
 				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -7792,7 +7864,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					var question models.AlphaQuestion
 
 					// Call "Scan()" function to the result set of the second SQL query.
-					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 						log.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
@@ -7884,7 +7956,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					QUESTIONS.TEXT,
 					QUESTIONS.WIDGET,
 					QUESTIONS.REQUIRED,
-					QUESTIONS.POSITION
+					QUESTIONS.POSITION,
+       				QUESTIONS.CATEGORY
 				FROM SURVEYS_QUESTIONS_RELATIONSHIP
 				INNER JOIN QUESTIONS
 				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -7900,7 +7973,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					var question models.AlphaQuestion
 
 					// Call "Scan()" function to the result set of the second SQL query.
-					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 						log.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
@@ -7993,7 +8066,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -8009,7 +8083,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -8101,7 +8175,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -8117,7 +8192,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -8209,7 +8284,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -8225,7 +8301,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -8317,7 +8393,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						QUESTIONS.TEXT,
 						QUESTIONS.WIDGET,
 						QUESTIONS.REQUIRED,
-						QUESTIONS.POSITION
+						QUESTIONS.POSITION,
+       					QUESTIONS.CATEGORY
 					FROM SURVEYS_QUESTIONS_RELATIONSHIP
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -8333,7 +8410,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						var question models.AlphaQuestion
 
 						// Call "Scan()" function to the result set of the second SQL query.
-						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 							log.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
@@ -8426,7 +8503,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					QUESTIONS.TEXT,
 					QUESTIONS.WIDGET,
 					QUESTIONS.REQUIRED,
-					QUESTIONS.POSITION
+					QUESTIONS.POSITION,
+       				QUESTIONS.CATEGORY
 				FROM SURVEYS_QUESTIONS_RELATIONSHIP
 				INNER JOIN QUESTIONS
 				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -8442,7 +8520,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					var question models.AlphaQuestion
 
 					// Call "Scan()" function to the result set of the second SQL query.
-					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 						log.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
@@ -8534,7 +8612,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					QUESTIONS.TEXT,
 					QUESTIONS.WIDGET,
 					QUESTIONS.REQUIRED,
-					QUESTIONS.POSITION
+					QUESTIONS.POSITION,
+       				QUESTIONS.CATEGORY
 				FROM SURVEYS_QUESTIONS_RELATIONSHIP
 				INNER JOIN QUESTIONS
 				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -8550,7 +8629,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					var question models.AlphaQuestion
 
 					// Call "Scan()" function to the result set of the second SQL query.
-					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 						log.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
@@ -8642,7 +8721,8 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					QUESTIONS.TEXT,
 					QUESTIONS.WIDGET,
 					QUESTIONS.REQUIRED,
-					QUESTIONS.POSITION
+					QUESTIONS.POSITION,
+       				QUESTIONS.CATEGORY
 				FROM SURVEYS_QUESTIONS_RELATIONSHIP
 				INNER JOIN QUESTIONS
 				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -8658,7 +8738,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					var question models.AlphaQuestion
 
 					// Call "Scan()" function to the result set of the second SQL query.
-					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 						log.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
@@ -9376,7 +9456,8 @@ var GetAlphaSurvey = func(responseWriter http.ResponseWriter, request *http.Requ
 		QUESTIONS.TEXT,
 		QUESTIONS.WIDGET,
 		QUESTIONS.REQUIRED,
-		QUESTIONS.POSITION
+		QUESTIONS.POSITION,
+       	QUESTIONS.CATEGORY
 	FROM SURVEYS_QUESTIONS_RELATIONSHIP
 	INNER JOIN QUESTIONS
 	ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -9395,7 +9476,7 @@ var GetAlphaSurvey = func(responseWriter http.ResponseWriter, request *http.Requ
 		var question models.AlphaQuestion
 
 		// Call "Scan()" function to the result set of the second SQL query.
-		if err := firstQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+		if err := firstQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 			log.Println(err)
 			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 			return
@@ -9486,7 +9567,8 @@ var GetAvailableSurvey = func(responseWriter http.ResponseWriter, request *http.
 				QUESTIONS.TEXT,
 				QUESTIONS.WIDGET,
 				QUESTIONS.REQUIRED,
-				QUESTIONS.POSITION
+				QUESTIONS.POSITION,
+       			QUESTIONS.CATEGORY
 			FROM SURVEYS_QUESTIONS_RELATIONSHIP
 			INNER JOIN QUESTIONS
 			ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
@@ -9505,7 +9587,7 @@ var GetAvailableSurvey = func(responseWriter http.ResponseWriter, request *http.
 				var question models.AlphaQuestion
 
 				// Call "Scan()" function to the result set of the second SQL query.
-				if err := firstQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position); err != nil {
+				if err := firstQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 					log.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return

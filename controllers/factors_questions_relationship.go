@@ -233,7 +233,7 @@ var GetBetaFactorsQuestionsRelationship = func(responseWriter http.ResponseWrite
 		// Check the value of the variables.
 		if len(factorIdentifier) != 0 {
 			// Make SQL query by "database/sql" package.
-			rows, err := database.DBSQL.Query("SELECT ID, TEXT, WIDGET FROM FACTORS_QUESTIONS_RELATIONSHIP INNER JOIN QUESTIONS ON FACTORS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID WHERE FACTOR_ID = $1",  factorIdentifier); if err != nil {
+			rows, err := database.DBSQL.Query("SELECT ID, TEXT, WIDGET, REQUIRED, POSITION, CATEGORY FROM FACTORS_QUESTIONS_RELATIONSHIP INNER JOIN QUESTIONS ON FACTORS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID WHERE FACTOR_ID = $1 ORDER BY POSITION ASC",  factorIdentifier); if err != nil {
 				log.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
@@ -248,7 +248,7 @@ var GetBetaFactorsQuestionsRelationship = func(responseWriter http.ResponseWrite
 				var question models.BetaQuestion
 
 				// Call "Scan()" function on the result set of the SQL query.
-				if err := rows.Scan(&question.ID, &question.Text, &question.Widget); err != nil {
+				if err := rows.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 					log.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
