@@ -99,6 +99,7 @@ func Handle(router *mux.Router) {
 	router.HandleFunc("/api/multiple/survey_question_relationship", controllers.CreateMultipleSurveyQuestionRelationship).Methods("POST")
 	router.HandleFunc("/api/single/survey_question_relationship", controllers.DeleteSingleSurveyQuestionRelationship).Methods("DELETE")
 	router.HandleFunc("/api/multiple/survey_question_relationship", controllers.DeleteMultipleSurveyQuestionRelationship).Methods("DELETE")
+	router.HandleFunc("/api/check/survey_question_relationship", controllers.CheckSurveyQuestionRelationship).Methods("GET")
 
 	router.HandleFunc("/api/single/survey_employee_relationship", controllers.CreateSingleSurveyEmployeeRelationship).Methods("POST")
 	router.HandleFunc("/api/multiple/survey_employee_relationship", controllers.CreateMultipleSurveyEmployeeRelationship).Methods("POST")
