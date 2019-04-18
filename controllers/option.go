@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+	"os"
 	"questionnaire/database"
 	"questionnaire/models"
 	"questionnaire/utils"
@@ -12,12 +13,15 @@ import (
 )
 
 var GetOptions = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a array.
 	var options []models.Option
 
 	// CRUD interface of "GORM" ORM library to select all entries.
 	if err := database.DBGORM.Find(&options).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -33,6 +37,9 @@ var GetOptions = func(responseWriter http.ResponseWriter, request *http.Request)
 }
 
 var CreateOption = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a "Option" struct.
 	option := models.Option{}
 
@@ -42,7 +49,7 @@ var CreateOption = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// Decode reads the JSON value from its input and stores it in the value pointed to by "&option".
 	if err := decoder.Decode(&option); err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -52,7 +59,7 @@ var CreateOption = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// CRUD interface of "GORM" ORM library to create new entry.
 	if err := database.DBGORM.Save(&option).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -62,6 +69,9 @@ var CreateOption = func(responseWriter http.ResponseWriter, request *http.Reques
 }
 
 var GetOption = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Take variable from path with the help of "Gorilla Mux" library.
 	// The most common numeric conversions are Atoi (string to int) and Itoa (int to string).
 	optionIdentifier := mux.Vars(request)["option_id"]
@@ -71,7 +81,7 @@ var GetOption = func(responseWriter http.ResponseWriter, request *http.Request) 
 
 	// CRUD interface of "GORM" ORM library to find entry by unique identifier.
 	if err := database.DBGORM.Where("ID = ?", optionIdentifier).Find(&option).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusNotFound, "http.StatusNotFound")
 		return
 	}
@@ -81,6 +91,9 @@ var GetOption = func(responseWriter http.ResponseWriter, request *http.Request) 
 }
 
 var UpdateOption = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Take variable from path with the help of "Gorilla Mux" library.
 	// The most common numeric conversions are Atoi (string to int) and Itoa (int to string).
 	optionIdentifier := mux.Vars(request)["option_id"]
@@ -90,7 +103,7 @@ var UpdateOption = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// CRUD interface of "GORM" ORM library to find entry by unique identifier.
 	if err := database.DBGORM.Where("ID = ?", optionIdentifier).Find(&option).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusNotFound, "http.StatusNotFound")
 		return
 	}
@@ -101,7 +114,7 @@ var UpdateOption = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// Decode reads the JSON value from its input and stores it in the value pointed to by "&option".
 	if err := decoder.Decode(&option); err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -111,7 +124,7 @@ var UpdateOption = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// CRUD interface of "GORM" ORM library to update information of the entry.
 	if err := database.DBGORM.Save(&option).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -121,6 +134,9 @@ var UpdateOption = func(responseWriter http.ResponseWriter, request *http.Reques
 }
 
 var DeleteOption = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Take variable from path with the help of "Gorilla Mux" library.
 	// The most common numeric conversions are Atoi (string to int) and Itoa (int to string).
 	optionIdentifier := mux.Vars(request)["option_id"]
@@ -130,14 +146,14 @@ var DeleteOption = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// CRUD interface of "GORM" ORM library to find entry by unique identifier.
 	if err := database.DBGORM.Where("ID = ?", optionIdentifier).Find(&option).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusNotFound, "http.StatusNotFound")
 		return
 	}
 
 	// CRUD interface of "GORM" ORM library to delete the entry.
 	if err := database.DBGORM.Delete(&option).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}

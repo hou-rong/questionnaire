@@ -5,6 +5,7 @@ import (
 	"github.com/lib/pq"
 	"log"
 	"net/http"
+	"os"
 	"questionnaire/database"
 	"questionnaire/models"
 	"questionnaire/utils"
@@ -13,6 +14,9 @@ import (
 )
 
 var CreateSingleIntFactorQuestionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a "FactorQuestionRelationship" struct.
 	factorQuestionRelationship := models.FactorQuestionRelationship{}
 
@@ -22,7 +26,7 @@ var CreateSingleIntFactorQuestionRelationship = func(responseWriter http.Respons
 
 	// Decode reads the JSON value from its input and stores it in the value pointed to by "&factorQuestionRelationship".
 	if err := decoder.Decode(&factorQuestionRelationship); err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -32,7 +36,7 @@ var CreateSingleIntFactorQuestionRelationship = func(responseWriter http.Respons
 
 	// CRUD interface of "GORM" ORM library to create new entry.
 	if err := database.DBGORM.Save(&factorQuestionRelationship).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -42,6 +46,9 @@ var CreateSingleIntFactorQuestionRelationship = func(responseWriter http.Respons
 }
 
 var CreateMultipleIntFactorQuestionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Initialize "RequestBody" struct.
 	type RequestBody struct {
 		FactorID int `json:"factor_id"`
@@ -57,7 +64,7 @@ var CreateMultipleIntFactorQuestionRelationship = func(responseWriter http.Respo
 
 	// Decode reads the JSON value from its input and stores it in the value pointed to by "&requestBody".
 	if err := decoder.Decode(&requestBody); err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -73,7 +80,7 @@ var CreateMultipleIntFactorQuestionRelationship = func(responseWriter http.Respo
 
 	// Make SQL query by "database/sql" package.
 	_, err := database.DBSQL.Exec(sqlStatement.String()); if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -83,6 +90,9 @@ var CreateMultipleIntFactorQuestionRelationship = func(responseWriter http.Respo
 }
 
 var CreateMultipleTextFactorQuestionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Initialize "RequestBody" struct.
 	type RequestBody struct {
 		FactorID int `json:"factor_id"`
@@ -102,7 +112,7 @@ var CreateMultipleTextFactorQuestionRelationship = func(responseWriter http.Resp
 
 	// Decode reads the JSON value from its input and stores it in the value pointed to by "&requestBody".
 	if err := decoder.Decode(&requestBody); err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -140,7 +150,7 @@ var CreateMultipleTextFactorQuestionRelationship = func(responseWriter http.Resp
 
 	// Execute SQL query by "database/sql" package.
 	if err := database.DBSQL.QueryRow(sqlStatement.String()).Scan(&questionIdentifiers); err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -150,6 +160,9 @@ var CreateMultipleTextFactorQuestionRelationship = func(responseWriter http.Resp
 }
 
 var DeleteSingleIntFactorQuestionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a array of URL parameters from the request.
 	keys := request.URL.Query()
 
@@ -168,7 +181,7 @@ var DeleteSingleIntFactorQuestionRelationship = func(responseWriter http.Respons
 
 			// CRUD interface of "GORM" ORM library to delete information of the entry.
 			if err := database.DBGORM.Where("FACTOR_ID = ? AND QUESTION_ID = ?", factorIdentifier, questionIdentifier).Delete(&factorQuestionRelationship).Error; err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -186,6 +199,9 @@ var DeleteSingleIntFactorQuestionRelationship = func(responseWriter http.Respons
 }
 
 var DeleteMultipleIntFactorQuestionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a array of URL parameters from the request.
 	keys := request.URL.Query()
 
@@ -201,7 +217,7 @@ var DeleteMultipleIntFactorQuestionRelationship = func(responseWriter http.Respo
 
 			// CRUD interface of "GORM" ORM library to delete information of the entry.
 			if err := database.DBGORM.Where("FACTOR_ID = ?", factorIdentifier).Delete(&factorQuestionRelationship).Error; err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -219,6 +235,9 @@ var DeleteMultipleIntFactorQuestionRelationship = func(responseWriter http.Respo
 }
 
 var GetBetaFactorsQuestionsRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a array of URL parameters from the request.
 	keys := request.URL.Query()
 
@@ -234,7 +253,7 @@ var GetBetaFactorsQuestionsRelationship = func(responseWriter http.ResponseWrite
 		if len(factorIdentifier) != 0 {
 			// Make SQL query by "database/sql" package.
 			rows, err := database.DBSQL.Query("SELECT ID, TEXT, WIDGET, REQUIRED, POSITION, CATEGORY FROM FACTORS_QUESTIONS_RELATIONSHIP INNER JOIN QUESTIONS ON FACTORS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID WHERE FACTOR_ID = $1 ORDER BY POSITION ASC",  factorIdentifier); if err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -249,7 +268,7 @@ var GetBetaFactorsQuestionsRelationship = func(responseWriter http.ResponseWrite
 
 				// Call "Scan()" function on the result set of the SQL query.
 				if err := rows.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}

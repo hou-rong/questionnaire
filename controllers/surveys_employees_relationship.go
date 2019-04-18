@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 	"questionnaire/database"
 	"questionnaire/models"
 	"questionnaire/utils"
@@ -11,6 +12,9 @@ import (
 )
 
 var CreateSingleSurveyEmployeeRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a "SurveyEmployeeRelationship" struct.
 	surveyEmployeeRelationship := models.SurveyEmployeeRelationship{}
 
@@ -20,6 +24,7 @@ var CreateSingleSurveyEmployeeRelationship = func(responseWriter http.ResponseWr
 
 	// Decode reads the JSON value from its input and stores it in the value pointed to by "&surveyFactorRelationship".
 	if err := decoder.Decode(&surveyEmployeeRelationship); err != nil {
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -29,6 +34,7 @@ var CreateSingleSurveyEmployeeRelationship = func(responseWriter http.ResponseWr
 
 	// CRUD interface of "GORM" ORM library to create new entry.
 	if err := database.DBGORM.Save(&surveyEmployeeRelationship).Error; err != nil {
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -38,6 +44,9 @@ var CreateSingleSurveyEmployeeRelationship = func(responseWriter http.ResponseWr
 }
 
 var CreateMultipleSurveyEmployeeRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Initialize "RequestBody" struct.
 	type RequestBody struct {
 		SurveyID string `json:"survey_id"`
@@ -53,7 +62,7 @@ var CreateMultipleSurveyEmployeeRelationship = func(responseWriter http.Response
 
 	// Decode reads the JSON value from its input and stores it in the value pointed to by "&requestBody".
 	if err := decoder.Decode(&requestBody); err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -68,7 +77,7 @@ var CreateMultipleSurveyEmployeeRelationship = func(responseWriter http.Response
 
 	// Make SQL query by "database/sql" package.
 	_, err := database.DBSQL.Exec(sqlStatement.String()); if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -78,6 +87,9 @@ var CreateMultipleSurveyEmployeeRelationship = func(responseWriter http.Response
 }
 
 var DeleteSingleSurveyEmployeeRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a array of URL parameters from the request.
 	keys := request.URL.Query()
 
@@ -96,7 +108,7 @@ var DeleteSingleSurveyEmployeeRelationship = func(responseWriter http.ResponseWr
 
 			// CRUD interface of "GORM" ORM library to delete information of the entry.
 			if err := database.DBGORM.Where("SURVEY_ID = ? AND EMPLOYEE = ?", surveyIdentifier, employee).Delete(&surveyEmployeeRelationship).Error; err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -114,6 +126,9 @@ var DeleteSingleSurveyEmployeeRelationship = func(responseWriter http.ResponseWr
 }
 
 var DeleteMultipleSurveyEmployeeRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a array of URL parameters from the request.
 	keys := request.URL.Query()
 
@@ -129,7 +144,7 @@ var DeleteMultipleSurveyEmployeeRelationship = func(responseWriter http.Response
 
 			// CRUD interface of "GORM" ORM library to delete information of the entry.
 			if err := database.DBGORM.Where("SURVEY_ID = ?", surveyIdentifier).Delete(&surveyEmployeeRelationship).Error; err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -147,6 +162,9 @@ var DeleteMultipleSurveyEmployeeRelationship = func(responseWriter http.Response
 }
 
 var UpdateSingleSurveyEmployeeRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a array of URL parameters from the request.
 	keys := request.URL.Query()
 
@@ -174,14 +192,14 @@ var UpdateSingleSurveyEmployeeRelationship = func(responseWriter http.ResponseWr
 
 			// Decode reads the JSON value from its input and stores it in the value pointed to by "&requestBody".
 			if err := decoder.Decode(&requestBody); err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 				return
 			}
 
 			// Make SQL query by "database/sql" package.
 			_, err := database.DBSQL.Exec("UPDATE SURVEYS_EMPLOYEES_RELATIONSHIP SET STATUS = $1 WHERE SURVEY_ID = $2 AND EMPLOYEE = $3", requestBody.Status, surveyIdentifier, employee); if err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}

@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+	"os"
 	"questionnaire/database"
 	"questionnaire/models"
 	"questionnaire/utils"
@@ -13,12 +14,15 @@ import (
 )
 
 var GetAlphaFactors = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a array.
 	var factors []models.AlphaFactor
 
 	// Execute the SQL query to get all factors.
 	firstQuery, err := database.DBSQL.Query("SELECT * FROM factors;"); if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -33,7 +37,7 @@ var GetAlphaFactors = func(responseWriter http.ResponseWriter, request *http.Req
 
 		// Call "Scan()" function to the result set of the first SQL query.
 		if err := firstQuery.Scan(&factor.ID, &factor.Name); err != nil {
-			log.Println(err)
+			logger.Println(err)
 			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 			return
 		}
@@ -50,7 +54,7 @@ var GetAlphaFactors = func(responseWriter http.ResponseWriter, request *http.Req
 		INNER JOIN QUESTIONS
 		ON FACTORS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 		WHERE FACTORS_QUESTIONS_RELATIONSHIP.FACTOR_ID = $1;`, factor.ID); if err != nil {
-			log.Println(err)
+			logger.Println(err)
 			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 			return
 		}
@@ -62,7 +66,7 @@ var GetAlphaFactors = func(responseWriter http.ResponseWriter, request *http.Req
 
 			// Call "Scan()" function to the result set of the second SQL query.
 			if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -76,7 +80,7 @@ var GetAlphaFactors = func(responseWriter http.ResponseWriter, request *http.Req
 			INNER JOIN OPTIONS
 			ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 			WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -88,7 +92,7 @@ var GetAlphaFactors = func(responseWriter http.ResponseWriter, request *http.Req
 
 				// Call "Scan()" function to the result set of the third SQL query.
 				if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -116,12 +120,15 @@ var GetAlphaFactors = func(responseWriter http.ResponseWriter, request *http.Req
 }
 
 var GetBetaFactors = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a array.
 	var factors []models.BetaFactor
 
 	// CRUD interface of "GORM" ORM library to select all entries.
 	if err := database.DBGORM.Find(&factors).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -137,6 +144,9 @@ var GetBetaFactors = func(responseWriter http.ResponseWriter, request *http.Requ
 }
 
 var GetAlphaFactor = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Take variable from path with the help of "Gorilla Mux" library.
 	// The most common numeric conversions are Atoi (string to int) and Itoa (int to string).
 	factorIdentifier := mux.Vars(request)["factor_id"]
@@ -146,7 +156,7 @@ var GetAlphaFactor = func(responseWriter http.ResponseWriter, request *http.Requ
 
 	// CRUD interface of "GORM" ORM library to find entry by unique identifier.
 	if err := database.DBGORM.Where("ID = ?", factorIdentifier).Find(&factor).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusNotFound, "http.StatusNotFound")
 		return
 	}
@@ -163,7 +173,7 @@ var GetAlphaFactor = func(responseWriter http.ResponseWriter, request *http.Requ
 		INNER JOIN QUESTIONS
 		ON FACTORS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 		WHERE FACTORS_QUESTIONS_RELATIONSHIP.FACTOR_ID = $1;`, factorIdentifier); if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -178,7 +188,7 @@ var GetAlphaFactor = func(responseWriter http.ResponseWriter, request *http.Requ
 
 		// Call "Scan()" function to the result set of the first SQL query.
 		if err := firstQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-			log.Println(err)
+			logger.Println(err)
 			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 			return
 		}
@@ -192,7 +202,7 @@ var GetAlphaFactor = func(responseWriter http.ResponseWriter, request *http.Requ
 			INNER JOIN OPTIONS
 			ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 			WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-			log.Println(err)
+			logger.Println(err)
 			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 			return
 		}
@@ -204,7 +214,7 @@ var GetAlphaFactor = func(responseWriter http.ResponseWriter, request *http.Requ
 
 			// Call "Scan()" function to the result set of the third SQL query.
 			if err := secondQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -225,6 +235,9 @@ var GetAlphaFactor = func(responseWriter http.ResponseWriter, request *http.Requ
 }
 
 var GetBetaFactor = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Take variable from path with the help of "Gorilla Mux" library.
 	// The most common numeric conversions are Atoi (string to int) and Itoa (int to string).
 	factorIdentifier := mux.Vars(request)["factor_id"]
@@ -234,7 +247,7 @@ var GetBetaFactor = func(responseWriter http.ResponseWriter, request *http.Reque
 
 	// CRUD interface of "GORM" ORM library to find entry by unique identifier.
 	if err := database.DBGORM.Where("ID = ?", factorIdentifier).Find(&factor).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusNotFound, "http.StatusNotFound")
 		return
 	}
@@ -244,6 +257,9 @@ var GetBetaFactor = func(responseWriter http.ResponseWriter, request *http.Reque
 }
 
 var CreateFactor = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a "BetaFactor" struct.
 	factor := models.BetaFactor{}
 
@@ -253,7 +269,7 @@ var CreateFactor = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// Decode reads the JSON value from its input and stores it in the value pointed to by "&factor".
 	if err := decoder.Decode(&factor); err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -263,7 +279,7 @@ var CreateFactor = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// CRUD interface of "GORM" ORM library to create new entry.
 	if err := database.DBGORM.Save(&factor).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -273,6 +289,9 @@ var CreateFactor = func(responseWriter http.ResponseWriter, request *http.Reques
 }
 
 var UpdateFactor = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Take variable from path with the help of "Gorilla Mux" library.
 	// The most common numeric conversions are Atoi (string to int) and Itoa (int to string).
 	factorIdentifier := mux.Vars(request)["factor_id"]
@@ -282,7 +301,7 @@ var UpdateFactor = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// CRUD interface of "GORM" ORM library to find entry by unique identifier.
 	if err := database.DBGORM.Where("ID = ?", factorIdentifier).Find(&factor).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusNotFound, "http.StatusNotFound")
 		return
 	}
@@ -293,7 +312,7 @@ var UpdateFactor = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// Decode reads the JSON value from its input and stores it in the value pointed to by "&factor".
 	if err := decoder.Decode(&factor); err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -303,7 +322,7 @@ var UpdateFactor = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// CRUD interface of "GORM" ORM library to update information of the entry.
 	if err := database.DBGORM.Save(&factor).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -313,6 +332,9 @@ var UpdateFactor = func(responseWriter http.ResponseWriter, request *http.Reques
 }
 
 var DeleteFactor = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Take variable from path with the help of "Gorilla Mux" library.
 	// The most common numeric conversions are Atoi (string to int) and Itoa (int to string).
 	factorIdentifier := mux.Vars(request)["factor_id"]
@@ -322,14 +344,14 @@ var DeleteFactor = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// CRUD interface of "GORM" ORM library to find entry by unique identifier.
 	if err := database.DBGORM.Where("ID = ?", factorIdentifier).Find(&factor).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusNotFound, "http.StatusNotFound")
 		return
 	}
 
 	// CRUD interface of "GORM" ORM library to delete the entry.
 	if err := database.DBGORM.Delete(&factor).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -339,6 +361,9 @@ var DeleteFactor = func(responseWriter http.ResponseWriter, request *http.Reques
 }
 
 var DeleteInFactor = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Take variable from path with the help of "Gorilla Mux" library.
 	// The most common numeric conversions are Atoi (string to int) and Itoa (int to string).
 	factorIdentifier := mux.Vars(request)["factor_id"]
@@ -351,7 +376,7 @@ var DeleteInFactor = func(responseWriter http.ResponseWriter, request *http.Requ
 
 	// Execute SQL query by "database/sql" package.
 	_, err := database.DBSQL.Exec(secondStatement.String()); if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -361,6 +386,9 @@ var DeleteInFactor = func(responseWriter http.ResponseWriter, request *http.Requ
 }
 
 var DeleteOutFactor = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Take variable from path with the help of "Gorilla Mux" library.
 	// The most common numeric conversions are Atoi (string to int) and Itoa (int to string).
 	factorIdentifier := mux.Vars(request)["factor_id"]
@@ -373,7 +401,7 @@ var DeleteOutFactor = func(responseWriter http.ResponseWriter, request *http.Req
 
 	// Execute SQL query by "database/sql" package.
 	_, err := database.DBSQL.Exec(secondStatement.String()); if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}

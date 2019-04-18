@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+	"os"
 	"questionnaire/database"
 	"questionnaire/models"
 	"questionnaire/utils"
@@ -12,6 +13,9 @@ import (
 )
 
 var GetAlphaQuestions = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a array of URL parameters from the request.
 	keys := request.URL.Query()
 
@@ -25,7 +29,7 @@ var GetAlphaQuestions = func(responseWriter http.ResponseWriter, request *http.R
 
 		// Execute the SQL query to get all questions by unique identifier of category.
 		firstQuery, err := database.DBSQL.Query("SELECT ID, TEXT, WIDGET, REQUIRED, POSITION, CATEGORY FROM QUESTIONS WHERE CATEGORY = $1;", categoryIdentifier); if err != nil {
-			log.Println(err)
+			logger.Println(err)
 			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 			return
 		}
@@ -40,7 +44,7 @@ var GetAlphaQuestions = func(responseWriter http.ResponseWriter, request *http.R
 
 			// Call "Scan()" function to the result set of the first SQL query.
 			if err := firstQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -54,7 +58,7 @@ var GetAlphaQuestions = func(responseWriter http.ResponseWriter, request *http.R
 			INNER JOIN OPTIONS
 			ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 			WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -66,7 +70,7 @@ var GetAlphaQuestions = func(responseWriter http.ResponseWriter, request *http.R
 
 				// Call "Scan()" function to the result set of the second SQL query.
 				if err := secondQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -90,7 +94,7 @@ var GetAlphaQuestions = func(responseWriter http.ResponseWriter, request *http.R
 
 		// Execute the SQL query to get all questions.
 		firstQuery, err := database.DBSQL.Query("SELECT ID, TEXT, WIDGET, REQUIRED, POSITION, CATEGORY FROM QUESTIONS;"); if err != nil {
-			log.Println(err)
+			logger.Println(err)
 			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 			return
 		}
@@ -105,7 +109,7 @@ var GetAlphaQuestions = func(responseWriter http.ResponseWriter, request *http.R
 
 			// Call "Scan()" function to the result set of the first SQL query.
 			if err := firstQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -119,7 +123,7 @@ var GetAlphaQuestions = func(responseWriter http.ResponseWriter, request *http.R
 			INNER JOIN OPTIONS
 			ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 			WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -131,7 +135,7 @@ var GetAlphaQuestions = func(responseWriter http.ResponseWriter, request *http.R
 
 				// Call "Scan()" function to the result set of the second SQL query.
 				if err := secondQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -153,6 +157,9 @@ var GetAlphaQuestions = func(responseWriter http.ResponseWriter, request *http.R
 }
 
 var GetBetaQuestions = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a array of URL parameters from the request.
 	keys := request.URL.Query()
 
@@ -166,7 +173,7 @@ var GetBetaQuestions = func(responseWriter http.ResponseWriter, request *http.Re
 
 		// CRUD interface of "GORM" ORM library to select all entries by unique identifier of category.
 		if err := database.DBGORM.Where("CATEGORY = ?", categoryIdentifier).Find(&questions).Error; err != nil {
-			log.Println(err)
+			logger.Println(err)
 			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 			return
 		}
@@ -185,7 +192,7 @@ var GetBetaQuestions = func(responseWriter http.ResponseWriter, request *http.Re
 
 		// CRUD interface of "GORM" ORM library to select all entries.
 		if err := database.DBGORM.Find(&questions).Error; err != nil {
-			log.Println(err)
+			logger.Println(err)
 			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 			return
 		}
@@ -202,6 +209,9 @@ var GetBetaQuestions = func(responseWriter http.ResponseWriter, request *http.Re
 }
 
 var GetAlphaQuestion = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Take variable from path with the help of "Gorilla Mux" library.
 	// The most common numeric conversions are Atoi (string to int) and Itoa (int to string).
 	questionIdentifier := mux.Vars(request)["question_id"]
@@ -211,7 +221,7 @@ var GetAlphaQuestion = func(responseWriter http.ResponseWriter, request *http.Re
 
 	// CRUD interface of "GORM" ORM library to find entry by unique identifier.
 	if err := database.DBGORM.Where("ID = ?", questionIdentifier).Find(&question).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusNotFound, "http.StatusNotFound")
 		return
 	}
@@ -225,7 +235,7 @@ var GetAlphaQuestion = func(responseWriter http.ResponseWriter, request *http.Re
 		INNER JOIN OPTIONS
 		ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 		WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, questionIdentifier); if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -237,7 +247,7 @@ var GetAlphaQuestion = func(responseWriter http.ResponseWriter, request *http.Re
 
 		// Call "Scan()" function on the result set of the first SQL query.
 		if err := firstQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-			log.Println(err)
+			logger.Println(err)
 			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 			return
 		}
@@ -254,6 +264,9 @@ var GetAlphaQuestion = func(responseWriter http.ResponseWriter, request *http.Re
 }
 
 var GetBetaQuestion = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Take variable from path with the help of "Gorilla Mux" library.
 	// The most common numeric conversions are Atoi (string to int) and Itoa (int to string).
 	questionIdentifier := mux.Vars(request)["question_id"]
@@ -263,7 +276,7 @@ var GetBetaQuestion = func(responseWriter http.ResponseWriter, request *http.Req
 
 	// CRUD interface of "GORM" ORM library to find entry by unique identifier.
 	if err := database.DBGORM.Where("ID = ?", questionIdentifier).Find(&question).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusNotFound, "http.StatusNotFound")
 		return
 	}
@@ -273,6 +286,9 @@ var GetBetaQuestion = func(responseWriter http.ResponseWriter, request *http.Req
 }
 
 var CreateQuestion = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a "BetaQuestion" struct.
 	question := models.BetaQuestion{}
 
@@ -282,7 +298,7 @@ var CreateQuestion = func(responseWriter http.ResponseWriter, request *http.Requ
 
 	// Decode reads the JSON value from its input and stores it in the value pointed to by "&question".
 	if err := decoder.Decode(&question); err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -292,7 +308,7 @@ var CreateQuestion = func(responseWriter http.ResponseWriter, request *http.Requ
 
 	// CRUD interface of "GORM" ORM library to create new entry.
 	if err := database.DBGORM.Save(&question).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -302,6 +318,9 @@ var CreateQuestion = func(responseWriter http.ResponseWriter, request *http.Requ
 }
 
 var UpdateQuestion = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Take variable from path with the help of "Gorilla Mux" library.
 	// The most common numeric conversions are Atoi (string to int) and Itoa (int to string).
 	questionIdentifier := mux.Vars(request)["question_id"]
@@ -311,7 +330,7 @@ var UpdateQuestion = func(responseWriter http.ResponseWriter, request *http.Requ
 
 	// CRUD interface of "GORM" ORM library to find entry by unique identifier.
 	if err := database.DBGORM.Where("ID = ?", questionIdentifier).Find(&question).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusNotFound, "http.StatusNotFound")
 		return
 	}
@@ -322,7 +341,7 @@ var UpdateQuestion = func(responseWriter http.ResponseWriter, request *http.Requ
 
 	// Decode reads the JSON value from its input and stores it in the value pointed to by "&question".
 	if err := decoder.Decode(&question); err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -332,7 +351,7 @@ var UpdateQuestion = func(responseWriter http.ResponseWriter, request *http.Requ
 
 	// CRUD interface of "GORM" ORM library to update information of the entry.
 	if err := database.DBGORM.Save(&question).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -342,6 +361,9 @@ var UpdateQuestion = func(responseWriter http.ResponseWriter, request *http.Requ
 }
 
 var DeleteQuestion = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Take variable from path with the help of "Gorilla Mux" library.
 	// The most common numeric conversions are Atoi (string to int) and Itoa (int to string).
 	questionIdentifier := mux.Vars(request)["question_id"]
@@ -351,14 +373,14 @@ var DeleteQuestion = func(responseWriter http.ResponseWriter, request *http.Requ
 
 	// CRUD interface of "GORM" ORM library to find entry by unique identifier.
 	if err := database.DBGORM.Where("ID = ?", questionIdentifier).Find(&question).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusNotFound, "http.StatusNotFound")
 		return
 	}
 
 	// CRUD interface of "GORM" ORM library to delete the entry.
 	if err := database.DBGORM.Delete(&question).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}

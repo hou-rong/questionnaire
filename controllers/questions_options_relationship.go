@@ -5,6 +5,7 @@ import (
 	"github.com/lib/pq"
 	"log"
 	"net/http"
+	"os"
 	"questionnaire/database"
 	"questionnaire/models"
 	"questionnaire/utils"
@@ -13,6 +14,9 @@ import (
 )
 
 var CreateSingleIntQuestionOptionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a "QuestionOptionRelationship" struct.
 	questionOptionRelationship := models.QuestionOptionRelationship{}
 
@@ -22,7 +26,7 @@ var CreateSingleIntQuestionOptionRelationship = func(responseWriter http.Respons
 
 	// Decode reads the JSON value from its input and stores it in the value pointed to by "&questionOptionRelationship".
 	if err := decoder.Decode(&questionOptionRelationship); err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -32,7 +36,7 @@ var CreateSingleIntQuestionOptionRelationship = func(responseWriter http.Respons
 
 	// CRUD interface of "GORM" ORM library to create new entry.
 	if err := database.DBGORM.Save(&questionOptionRelationship).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -42,6 +46,9 @@ var CreateSingleIntQuestionOptionRelationship = func(responseWriter http.Respons
 }
 
 var CreateMultipleIntQuestionOptionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Initialize "RequestBody" struct.
 	type RequestBody struct {
 		QuestionID int `json:"question_id"`
@@ -57,7 +64,7 @@ var CreateMultipleIntQuestionOptionRelationship = func(responseWriter http.Respo
 
 	// Decode reads the JSON value from its input and stores it in the value pointed to by "&requestBody".
 	if err := decoder.Decode(&requestBody); err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -73,7 +80,7 @@ var CreateMultipleIntQuestionOptionRelationship = func(responseWriter http.Respo
 
 	// Make SQL query by "database/sql" package.
 	_, err := database.DBSQL.Exec(sqlStatement.String()); if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -83,6 +90,9 @@ var CreateMultipleIntQuestionOptionRelationship = func(responseWriter http.Respo
 }
 
 var CreateMultipleTextQuestionOptionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Initialize "RequestBody" struct.
 	type RequestBody struct {
 		QuestionID int `json:"question_id"`
@@ -100,7 +110,7 @@ var CreateMultipleTextQuestionOptionRelationship = func(responseWriter http.Resp
 
 	// Decode reads the JSON value from its input and stores it in the value pointed to by "&requestBody".
 	if err := decoder.Decode(&requestBody); err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -130,7 +140,7 @@ var CreateMultipleTextQuestionOptionRelationship = func(responseWriter http.Resp
 
 	// Execute SQL query by "database/sql" package.
 	if err := database.DBSQL.QueryRow(sqlStatement.String()).Scan(&optionsIdentifiers); err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -140,6 +150,9 @@ var CreateMultipleTextQuestionOptionRelationship = func(responseWriter http.Resp
 }
 
 var DeleteSingleIntQuestionOptionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a array of URL parameters from the request.
 	keys := request.URL.Query()
 
@@ -158,7 +171,7 @@ var DeleteSingleIntQuestionOptionRelationship = func(responseWriter http.Respons
 
 			// CRUD interface of "GORM" ORM library to delete information of the entry.
 			if err := database.DBGORM.Where("QUESTION_ID = ? AND OPTION_ID = ?", questionIdentifier, optionIdentifier).Delete(&questionOptionRelationship).Error; err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -176,6 +189,9 @@ var DeleteSingleIntQuestionOptionRelationship = func(responseWriter http.Respons
 }
 
 var DeleteMultipleIntQuestionOptionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a array of URL parameters from the request.
 	keys := request.URL.Query()
 
@@ -191,7 +207,7 @@ var DeleteMultipleIntQuestionOptionRelationship = func(responseWriter http.Respo
 
 			// CRUD interface of "GORM" ORM library to delete information of the entry.
 			if err := database.DBGORM.Where("QUESTION_ID = ?", questionIdentifier).Delete(&questionOptionRelationship).Error; err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -209,6 +225,9 @@ var DeleteMultipleIntQuestionOptionRelationship = func(responseWriter http.Respo
 }
 
 var GetQuestionsOptionsRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a array of URL parameters from the request.
 	keys := request.URL.Query()
 
@@ -224,7 +243,7 @@ var GetQuestionsOptionsRelationship = func(responseWriter http.ResponseWriter, r
 		if len(questionIdentifier) != 0 {
 			// Make SQL query by "database/sql" package.
 			rows, err := database.DBSQL.Query("SELECT ID, TEXT FROM QUESTIONS_OPTIONS_RELATIONSHIP INNER JOIN OPTIONS ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID WHERE QUESTION_ID = $1", questionIdentifier); if err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -239,7 +258,7 @@ var GetQuestionsOptionsRelationship = func(responseWriter http.ResponseWriter, r
 
 				// Call "Scan()" function on the result set of the SQL query.
 				if err := rows.Scan(&option.ID, &option.Text); err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}

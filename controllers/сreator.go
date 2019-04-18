@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/lib/pq"
 	"log"
+	"os"
 	"questionnaire/database"
 	"strconv"
 	"strings"
@@ -15,7 +16,10 @@ type Entry struct {
 }
 
 var Creator = func() {
-	log.Println("CRONTAB scheduler job/script (\"CREATOR\") has been started.")
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
+	logger.Println("CRONTAB scheduler job/script (\"CREATOR\") has been started.")
 
 	/*
 	Make SQL query by "database/sql" package.
@@ -34,7 +38,7 @@ var Creator = func() {
 	      SURVEY_ID IN (SELECT ID FROM SURVEYS WHERE CONDITION = 2 AND BLOCKED = TRUE)
 	GROUP BY
 		SURVEY_ID`); if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		return
 	}
 
@@ -56,7 +60,7 @@ var Creator = func() {
 
 		// Call "Scan()" function on the result set of the SQL query.
 		if err := rows.Scan(&entry.SurveyIdentifier, &entry.Organizations); err != nil {
-			log.Println(err)
+			logger.Println(err)
 			return
 		}
 
@@ -67,6 +71,9 @@ var Creator = func() {
 }
 
 func Worker(channel <- chan Entry) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	for entry := range channel {
 		// Build first SQL statement.
 		var firstStatement strings.Builder
@@ -107,7 +114,7 @@ func Worker(channel <- chan Entry) {
 		| 'SKorzhavykh@beeline.kz','YKulikpayev@beeline.kz','SChebykin@beeline.kz' |
 		*/
 		if err := database.OracleDB.QueryRow(firstStatement.String(), arguments...).Scan(&employees.Emails); err != nil {
-			log.Println(err)
+			logger.Println(err)
 			return
 		}
 
@@ -121,7 +128,7 @@ func Worker(channel <- chan Entry) {
 
 		// Make SQL query by "database/sql" package which insert multiple rows by one query.
 		_, err := database.DBSQL.Exec(secondStatement.String()); if err != nil {
-			log.Println(err)
+			logger.Println(err)
 			return
 		}
 	}

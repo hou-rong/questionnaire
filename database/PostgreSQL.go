@@ -8,6 +8,7 @@ import (
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"log"
+	"os"
 	"questionnaire/utils"
 )
 
@@ -23,11 +24,14 @@ Function description:
 The main task of the function is to check the connection to remote PostgreSQL database with the help of "gorm" and "database/sql" package.
 */
 func ConnectPostgreSQL() {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// The application load environment variables from the ".env" file.
 	err := godotenv.Load(".env")
 	// If the ".env" file is not available the application will show an error message.
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		panic(err)
 	}
 
@@ -44,7 +48,7 @@ func ConnectPostgreSQL() {
 	DBGORM, err = gorm.Open("postgres", GORMDatabaseURL)
 	// If connection pool creation process was unsuccessful the application show an error message.
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		panic(err)
 	}
 
@@ -52,7 +56,7 @@ func ConnectPostgreSQL() {
 	err = DBGORM.DB().Ping()
 	// If ping process to the remote PostgreSQL database raise error the application show an error message.
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		panic(err)
 	}
 
@@ -68,7 +72,7 @@ func ConnectPostgreSQL() {
 	DBSQL, err = sql.Open("postgres", SQLDatabaseURL)
 	// If connection pool creation process was unsuccessful the application show an error message.
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		panic(err)
 	}
 
@@ -76,11 +80,11 @@ func ConnectPostgreSQL() {
 	err = DBSQL.Ping()
 	// If ping process to the remote PostgreSQL database raise error the application show an error message.
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		panic(err)
 	}
 
-	log.Println("Web service successfully connected to remote PostgreSQL database with the help of \"database/sql\" package.")
+	logger.Println("Web service successfully connected to remote PostgreSQL database with the help of \"database/sql\" package.")
 }
 
 /*

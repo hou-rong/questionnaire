@@ -6,6 +6,7 @@ import (
 	"github.com/joho/godotenv"
 	_ "gopkg.in/goracle.v2"
 	"log"
+	"os"
 	"questionnaire/utils"
 )
 
@@ -19,11 +20,14 @@ Function description:
 The main task of the function is to check the connection to remote Oracle database with the help of "database/sql" package.
 */
 func ConnectOracle() {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// The application load environment variables from the ".env" file.
 	err := godotenv.Load(".env")
 	// If the ".env" file is not available the application will show an error message.
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		panic(err)
 	}
 
@@ -41,7 +45,7 @@ func ConnectOracle() {
 	OracleDB, err = sql.Open("goracle", databaseURL)
 	// If connection pool creation process was unsuccessful the application show an error message.
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		panic(err)
 	}
 
@@ -49,11 +53,11 @@ func ConnectOracle() {
 	err = OracleDB.Ping()
 	// If ping process to the remote PostgreSQL database raise error the application show an error message.
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		panic(err)
 	}
 
-	log.Println("Web service successfully connected to remote ORACLE database with the help of \"gopkg.in/goracle.v2\" package.")
+	logger.Println("Web service successfully connected to remote ORACLE database with the help of \"gopkg.in/goracle.v2\" package.")
 }
 
 /*

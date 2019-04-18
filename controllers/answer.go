@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 	"questionnaire/database"
 	"questionnaire/models"
 	"questionnaire/utils"
@@ -11,6 +12,9 @@ import (
 )
 
 var CreateMultipleAnswer = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a "MultipleAnswer" struct.
 	requestBody := models.MultipleAnswer{}
 
@@ -20,7 +24,7 @@ var CreateMultipleAnswer = func(responseWriter http.ResponseWriter, request *htt
 
 	// Decode reads the JSON value from its input and stores it in the value pointed to by "&requestBody".
 	if err := decoder.Decode(&requestBody); err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -59,7 +63,7 @@ var CreateMultipleAnswer = func(responseWriter http.ResponseWriter, request *htt
 
 	// Make SQL query by "database/sql" package.
 	_, err := database.DBSQL.Exec(sqlStatement.String()); if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}

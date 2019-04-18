@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+	"os"
 	"questionnaire/database"
 	"questionnaire/models"
 	"questionnaire/utils"
@@ -12,12 +13,15 @@ import (
 )
 
 var GetConditions = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a array.
 	var conditions []models.Condition
 
 	// CRUD interface of "GORM" ORM library to select all entries.
 	if err := database.DBGORM.Find(&conditions).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -33,6 +37,9 @@ var GetConditions = func(responseWriter http.ResponseWriter, request *http.Reque
 }
 
 var CreateCondition = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a "Condition" struct.
 	condition := models.Condition{}
 
@@ -42,7 +49,7 @@ var CreateCondition = func(responseWriter http.ResponseWriter, request *http.Req
 
 	// Decode reads the JSON value from its input and stores it in the value pointed to by "&condition".
 	if err := decoder.Decode(&condition); err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -52,7 +59,7 @@ var CreateCondition = func(responseWriter http.ResponseWriter, request *http.Req
 
 	// CRUD interface of "GORM" ORM library to create new entry.
 	if err := database.DBGORM.Save(&condition).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -62,6 +69,9 @@ var CreateCondition = func(responseWriter http.ResponseWriter, request *http.Req
 }
 
 var GetCondition = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Take variable from path with the help of "Gorilla Mux" library.
 	// The most common numeric conversions are Atoi (string to int) and Itoa (int to string).
 	conditionIdentifier := mux.Vars(request)["condition_id"]
@@ -71,7 +81,7 @@ var GetCondition = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// CRUD interface of "GORM" ORM library to find entry by unique identifier.
 	if err := database.DBGORM.Where("ID = ?", conditionIdentifier).Find(&condition).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusNotFound, "http.StatusNotFound")
 		return
 	}
@@ -81,6 +91,9 @@ var GetCondition = func(responseWriter http.ResponseWriter, request *http.Reques
 }
 
 var UpdateCondition = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Take variable from path with the help of "Gorilla Mux" library.
 	// The most common numeric conversions are Atoi (string to int) and Itoa (int to string).
 	conditionIdentifier := mux.Vars(request)["condition_id"]
@@ -90,7 +103,7 @@ var UpdateCondition = func(responseWriter http.ResponseWriter, request *http.Req
 
 	// CRUD interface of "GORM" ORM library to find entry by unique identifier.
 	if err := database.DBGORM.Where("ID = ?", conditionIdentifier).Find(&condition).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusNotFound, "http.StatusNotFound")
 		return
 	}
@@ -101,7 +114,7 @@ var UpdateCondition = func(responseWriter http.ResponseWriter, request *http.Req
 
 	// Decode reads the JSON value from its input and stores it in the value pointed to by "&condition".
 	if err := decoder.Decode(&condition); err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -111,7 +124,7 @@ var UpdateCondition = func(responseWriter http.ResponseWriter, request *http.Req
 
 	// CRUD interface of "GORM" ORM library to update information of the entry.
 	if err := database.DBGORM.Save(&condition).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -121,6 +134,9 @@ var UpdateCondition = func(responseWriter http.ResponseWriter, request *http.Req
 }
 
 var DeleteCondition = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Take variable from path with the help of "Gorilla Mux" library.
 	// The most common numeric conversions are Atoi (string to int) and Itoa (int to string).
 	conditionIdentifier := mux.Vars(request)["condition_id"]
@@ -130,14 +146,14 @@ var DeleteCondition = func(responseWriter http.ResponseWriter, request *http.Req
 
 	// CRUD interface of "GORM" ORM library to find entry by unique identifier.
 	if err := database.DBGORM.Where("ID = ?", conditionIdentifier).Find(&condition).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusNotFound, "http.StatusNotFound")
 		return
 	}
 
 	// CRUD interface of "GORM" ORM library to delete the entry.
 	if err := database.DBGORM.Delete(&condition).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}

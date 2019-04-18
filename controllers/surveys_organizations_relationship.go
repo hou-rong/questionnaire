@@ -5,6 +5,7 @@ import (
 	"github.com/lib/pq"
 	"log"
 	"net/http"
+	"os"
 	"questionnaire/database"
 	"questionnaire/models"
 	"questionnaire/utils"
@@ -13,6 +14,9 @@ import (
 )
 
 var CreateSingleSurveyOrganizationRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a "SurveyOrganizationRelationship" struct.
 	surveyOrganizationRelationship := models.SurveyOrganizationRelationship{}
 
@@ -22,7 +26,7 @@ var CreateSingleSurveyOrganizationRelationship = func(responseWriter http.Respon
 
 	// Decode reads the JSON value from its input and stores it in the value pointed to by "&surveyOrganizationRelationship".
 	if err := decoder.Decode(&surveyOrganizationRelationship); err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -32,7 +36,7 @@ var CreateSingleSurveyOrganizationRelationship = func(responseWriter http.Respon
 
 	// CRUD interface of "GORM" ORM library to create new entry.
 	if err := database.DBGORM.Save(&surveyOrganizationRelationship).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -42,6 +46,9 @@ var CreateSingleSurveyOrganizationRelationship = func(responseWriter http.Respon
 }
 
 var CreateMultipleSurveyOrganizationRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	type RequestBody struct {
 		SurveyID string `json:"survey_id"`
 		Organizations []int `json:"organizations"`
@@ -56,7 +63,7 @@ var CreateMultipleSurveyOrganizationRelationship = func(responseWriter http.Resp
 
 	// Decode reads the JSON value from its input and stores it in the value pointed to by "&requestBody".
 	if err := decoder.Decode(&requestBody); err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -72,7 +79,7 @@ var CreateMultipleSurveyOrganizationRelationship = func(responseWriter http.Resp
 
 	// Make SQL query by "database/sql" package.
 	_, err := database.DBSQL.Exec(sqlStatement.String()); if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -82,6 +89,9 @@ var CreateMultipleSurveyOrganizationRelationship = func(responseWriter http.Resp
 }
 
 var DeleteSingleSurveyOrganizationRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a array of URL parameters from the request.
 	keys := request.URL.Query()
 
@@ -100,7 +110,7 @@ var DeleteSingleSurveyOrganizationRelationship = func(responseWriter http.Respon
 
 			// CRUD interface of "GORM" ORM library to delete information of the entry.
 			if err := database.DBGORM.Where("SURVEY_ID = ? AND ORGANIZATION_ID = ?", surveyIdentifier, organizationIdentifier).Delete(&surveyOrganizationRelationship).Error; err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -118,6 +128,9 @@ var DeleteSingleSurveyOrganizationRelationship = func(responseWriter http.Respon
 }
 
 var DeleteMultipleSurveyOrganizationRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a array of URL parameters from the request.
 	keys := request.URL.Query()
 
@@ -133,7 +146,7 @@ var DeleteMultipleSurveyOrganizationRelationship = func(responseWriter http.Resp
 
 			// CRUD interface of "GORM" ORM library to delete information of the entry.
 			if err := database.DBGORM.Where("SURVEY_ID = ?", surveyIdentifier).Delete(&surveyOrganizationRelationship).Error; err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -151,6 +164,7 @@ var DeleteMultipleSurveyOrganizationRelationship = func(responseWriter http.Resp
 }
 
 var GetBetaSurveysOrganizationsRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
 	keys := request.URL.Query()
 	type Organization struct {
 		ID int `json:"organization_id"`
@@ -162,7 +176,7 @@ var GetBetaSurveysOrganizationsRelationship = func(responseWriter http.ResponseW
 		if len(surveyIdentifier) != 0 {
 			var identifiers pq.Int64Array
 			if err := database.DBSQL.QueryRow("SELECT ARRAY_AGG (ORGANIZATION_ID) FROM SURVEYS_ORGANIZATIONS_RELATIONSHIP WHERE SURVEY_ID = $1", surveyIdentifier).Scan(&identifiers); err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -185,7 +199,7 @@ var GetBetaSurveysOrganizationsRelationship = func(responseWriter http.ResponseW
 				return
 			}
 			rows, err := database.OracleDB.Query(stmt.String(), args...); if err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -193,7 +207,7 @@ var GetBetaSurveysOrganizationsRelationship = func(responseWriter http.ResponseW
 			for rows.Next() {
 				var organization Organization
 				if err := rows.Scan(&organization.ID, &organization.Name); err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+	"os"
 	"questionnaire/database"
 	"questionnaire/models"
 	"questionnaire/utils"
@@ -11,8 +12,9 @@ import (
 )
 
 var GetOrganizations = func(responseWriter http.ResponseWriter, request *http.Request) {
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
 	rows, err := database.OracleDB.Query("SELECT ORGANIZATION_ID, ORGANIZATION_NAME, ORGANIZATION_RANG, PARENT_ORGANIZATION_ID FROM NFS_DIM_ORG_STR WHERE ORGANIZATION_NAME IS NOT NULL AND RANG1_ORGANIZATION_ID NOT IN (28825, 27624, 27626, 28833, 29033) ORDER BY ORGANIZATION_RANG, ORGANIZATION_ID"); if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -22,7 +24,7 @@ var GetOrganizations = func(responseWriter http.ResponseWriter, request *http.Re
 		organization := &models.Organization{}
 		var parentOrganizationIdentifier sql.NullInt64
 		if err = rows.Scan(&organization.ID, &organization.Name, &organization.Rang, &parentOrganizationIdentifier); err != nil {
-			log.Println(err)
+			logger.Println(err)
 			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 			return
 		}

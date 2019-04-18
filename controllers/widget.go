@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+	"os"
 	"questionnaire/database"
 	"questionnaire/models"
 	"questionnaire/utils"
@@ -12,12 +13,15 @@ import (
 )
 
 var GetWidgets = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a array.
 	var widgets []models.Widget
 
 	// CRUD interface of "GORM" ORM library to select all entries.
 	if err := database.DBGORM.Find(&widgets).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -33,6 +37,9 @@ var GetWidgets = func(responseWriter http.ResponseWriter, request *http.Request)
 }
 
 var CreateWidget = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a "Widget" struct.
 	widget := models.Widget{}
 
@@ -42,7 +49,7 @@ var CreateWidget = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// Decode reads the JSON value from its input and stores it in the value pointed to by "&widget".
 	if err := decoder.Decode(&widget); err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -52,7 +59,7 @@ var CreateWidget = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// CRUD interface of "GORM" ORM library to create new entry.
 	if err := database.DBGORM.Save(&widget).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -62,6 +69,9 @@ var CreateWidget = func(responseWriter http.ResponseWriter, request *http.Reques
 }
 
 var GetWidget = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Take variable from path with the help of "Gorilla Mux" library.
 	// The most common numeric conversions are Atoi (string to int) and Itoa (int to string).
 	widgetIdentifier := mux.Vars(request)["widget_id"]
@@ -71,7 +81,7 @@ var GetWidget = func(responseWriter http.ResponseWriter, request *http.Request) 
 
 	// CRUD interface of "GORM" ORM library to find entry by unique identifier.
 	if err := database.DBGORM.Where("ID = ?", widgetIdentifier).Find(&widget).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusNotFound, "http.StatusNotFound")
 		return
 	}
@@ -81,6 +91,9 @@ var GetWidget = func(responseWriter http.ResponseWriter, request *http.Request) 
 }
 
 var UpdateWidget = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Take variable from path with the help of "Gorilla Mux" library.
 	// The most common numeric conversions are Atoi (string to int) and Itoa (int to string).
 	widgetIdentifier := mux.Vars(request)["widget_id"]
@@ -90,7 +103,7 @@ var UpdateWidget = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// CRUD interface of "GORM" ORM library to find entry by unique identifier.
 	if err := database.DBGORM.Where("ID = ?", widgetIdentifier).Find(&widget).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusNotFound, "http.StatusNotFound")
 		return
 	}
@@ -101,7 +114,7 @@ var UpdateWidget = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// Decode reads the JSON value from its input and stores it in the value pointed to by "&widget".
 	if err := decoder.Decode(&widget); err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -111,7 +124,7 @@ var UpdateWidget = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// CRUD interface of "GORM" ORM library to update information of the entry.
 	if err := database.DBGORM.Save(&widget).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -121,6 +134,9 @@ var UpdateWidget = func(responseWriter http.ResponseWriter, request *http.Reques
 }
 
 var DeleteWidget = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Take variable from path with the help of "Gorilla Mux" library.
 	// The most common numeric conversions are Atoi (string to int) and Itoa (int to string).
 	widgetIdentifier := mux.Vars(request)["widget_id"]
@@ -130,14 +146,14 @@ var DeleteWidget = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// CRUD interface of "GORM" ORM library to find entry by unique identifier.
 	if err := database.DBGORM.Where("ID = ?", widgetIdentifier).Find(&widget).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusNotFound, "http.StatusNotFound")
 		return
 	}
 
 	// CRUD interface of "GORM" ORM library to delete the entry.
 	if err := database.DBGORM.Delete(&widget).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}

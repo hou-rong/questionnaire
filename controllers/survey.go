@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+	"os"
 	"questionnaire/database"
 	"questionnaire/models"
 	"questionnaire/utils"
@@ -12,6 +13,9 @@ import (
 )
 
 var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a array.
 	var surveys []models.AlphaSurvey
 
@@ -22,7 +26,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 	if len(keys) == 0 {
 		// Execute the SQL query to get all surveys.
 		firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS ORDER BY CREATED_AT DESC;"); if err != nil {
-			log.Println(err)
+			logger.Println(err)
 			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 			return
 		}
@@ -51,7 +55,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 				&survey.Blocked,
 				&survey.TotalRespondents,
 				&survey.PastRespondents); err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -68,7 +72,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			INNER JOIN QUESTIONS
 			ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 			WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -80,7 +84,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 				// Call "Scan()" function to the result set of the second SQL query.
 				if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -94,7 +98,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 				INNER JOIN OPTIONS
 				ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 				WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -106,7 +110,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 					// Call "Scan()" function to the result set of the third SQL query.
 					if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -148,7 +152,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			if conditionIdentifier == "1" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 AND CONTROL = $4 AND EMAIL = $5 ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier, mark, control, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -177,7 +181,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -194,7 +198,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -206,7 +210,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -220,7 +224,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -232,7 +236,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -257,7 +261,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "2" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 AND CONTROL = $4 AND EMAIL = $5 ORDER BY START_PERIOD DESC;", categoryIdentifier, conditionIdentifier, mark, control, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -286,7 +290,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -303,7 +307,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -315,7 +319,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -329,7 +333,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -341,7 +345,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -366,7 +370,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "3" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 AND CONTROL = $4 AND EMAIL = $5 ORDER BY END_PERIOD DESC;", categoryIdentifier, conditionIdentifier, mark, control, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -395,7 +399,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -412,7 +416,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -424,7 +428,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -438,7 +442,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -450,7 +454,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -475,7 +479,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 AND CONTROL = $4 AND EMAIL = $5 ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier, mark, control, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -504,7 +508,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -521,7 +525,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -533,7 +537,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -547,7 +551,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -559,7 +563,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -586,7 +590,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			if conditionIdentifier == "1" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 AND CONTROL = $4 ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier, mark, control); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -615,7 +619,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -632,7 +636,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -644,7 +648,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -658,7 +662,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -670,7 +674,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -695,7 +699,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "2" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 AND CONTROL = $4 ORDER BY START_PERIOD DESC;", categoryIdentifier, conditionIdentifier, mark, control); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -724,7 +728,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -741,7 +745,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -753,7 +757,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -767,7 +771,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -779,7 +783,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -804,7 +808,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "3" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 AND CONTROL = $4 ORDER BY END_PERIOD DESC;", categoryIdentifier, conditionIdentifier, mark, control); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -833,7 +837,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -850,7 +854,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -862,7 +866,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -876,7 +880,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -888,7 +892,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -913,7 +917,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 AND CONTROL = $4 ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier, mark, control); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -942,7 +946,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -959,7 +963,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -971,7 +975,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -985,7 +989,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -997,7 +1001,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -1024,7 +1028,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			if conditionIdentifier == "1" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 AND EMAIL = $4 ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier, mark, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -1053,7 +1057,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -1070,7 +1074,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -1082,7 +1086,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -1096,7 +1100,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -1108,7 +1112,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -1133,7 +1137,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "2" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 AND EMAIL = $4 ORDER BY START_PERIOD DESC;", categoryIdentifier, conditionIdentifier, mark, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -1162,7 +1166,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -1179,7 +1183,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -1191,7 +1195,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -1205,7 +1209,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -1217,7 +1221,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -1242,7 +1246,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "3" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 AND EMAIL = $4 ORDER BY END_PERIOD DESC;", categoryIdentifier, conditionIdentifier, mark, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -1271,7 +1275,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -1288,7 +1292,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -1300,7 +1304,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -1314,7 +1318,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -1326,7 +1330,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -1351,7 +1355,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 AND EMAIL = $4 ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier, mark, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -1380,7 +1384,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -1397,7 +1401,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -1409,7 +1413,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -1423,7 +1427,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -1435,7 +1439,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -1462,7 +1466,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			if conditionIdentifier == "1" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND CONTROL = $3 AND EMAIL = $4 ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier, control, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -1491,7 +1495,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -1508,7 +1512,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -1520,7 +1524,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -1534,7 +1538,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -1546,7 +1550,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -1571,7 +1575,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "2" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND CONTROL = $3 AND EMAIL = $4 ORDER BY START_PERIOD DESC;", categoryIdentifier, conditionIdentifier, control, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -1600,7 +1604,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -1617,7 +1621,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -1629,7 +1633,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -1643,7 +1647,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -1655,7 +1659,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -1680,7 +1684,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "3" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND CONTROL = $3 AND EMAIL = $4 ORDER BY END_PERIOD DESC;", categoryIdentifier, conditionIdentifier, control, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -1709,7 +1713,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -1726,7 +1730,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -1738,7 +1742,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -1752,7 +1756,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -1764,7 +1768,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -1789,7 +1793,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND CONTROL = $3 AND EMAIL = $4 ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier, control, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -1818,7 +1822,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -1835,7 +1839,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -1847,7 +1851,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -1861,7 +1865,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 				INNER JOIN OPTIONS
 				ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 				WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -1873,7 +1877,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -1900,7 +1904,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			if conditionIdentifier == "1" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 AND CONTROL = $3 AND EMAIL = $4 ORDER BY CREATED_AT DESC;", conditionIdentifier, mark, control, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -1929,7 +1933,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -1946,7 +1950,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -1958,7 +1962,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -1972,7 +1976,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -1984,7 +1988,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -2009,7 +2013,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "2" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 AND CONTROL = $3 AND EMAIL = $4 ORDER BY START_PERIOD DESC;", conditionIdentifier, mark, control, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -2038,7 +2042,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -2055,7 +2059,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -2067,7 +2071,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -2081,7 +2085,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -2093,7 +2097,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -2118,7 +2122,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "3" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 AND CONTROL = $3 AND EMAIL = $4 ORDER BY END_PERIOD DESC;", conditionIdentifier, mark, control, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -2147,7 +2151,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -2164,7 +2168,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -2176,7 +2180,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -2190,7 +2194,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -2202,7 +2206,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -2227,7 +2231,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 AND CONTROL = $3 AND EMAIL = $4 ORDER BY CREATED_AT DESC;", conditionIdentifier, mark, control, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -2256,7 +2260,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -2273,7 +2277,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -2285,7 +2289,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -2299,7 +2303,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -2311,7 +2315,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -2337,7 +2341,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 		} else if len(categoryIdentifier) != 0 && len(mark) != 0 && len(control) != 0 && len(email) != 0 {
 			// Execute the SQL query to get all surveys.
 			firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND MARK = $2 AND CONTROL = $3 AND EMAIL = $4 ORDER BY CREATED_AT DESC;", categoryIdentifier, mark, control, email); if err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -2366,7 +2370,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					&survey.Blocked,
 					&survey.TotalRespondents,
 					&survey.PastRespondents); err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -2383,7 +2387,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 				INNER JOIN QUESTIONS
 				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 				WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -2395,7 +2399,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 					// Call "Scan()" function to the result set of the second SQL query.
 					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -2409,7 +2413,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN OPTIONS
 					ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 					WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -2421,7 +2425,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the third SQL query.
 						if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -2447,7 +2451,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			if conditionIdentifier == "1" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier, mark); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -2476,7 +2480,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -2493,7 +2497,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -2505,7 +2509,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -2519,7 +2523,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -2531,7 +2535,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -2556,7 +2560,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "2" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 ORDER BY START_PERIOD DESC;", categoryIdentifier, conditionIdentifier, mark); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -2585,7 +2589,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -2602,7 +2606,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -2614,7 +2618,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -2628,7 +2632,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -2640,7 +2644,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -2665,7 +2669,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "3" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 ORDER BY END_PERIOD DESC;", categoryIdentifier, conditionIdentifier, mark); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -2694,7 +2698,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -2711,7 +2715,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -2723,7 +2727,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -2737,7 +2741,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -2749,7 +2753,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -2774,7 +2778,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND MARK = $3 ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier, mark); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -2803,7 +2807,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -2820,7 +2824,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -2832,7 +2836,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -2846,7 +2850,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -2858,7 +2862,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -2885,7 +2889,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			if conditionIdentifier == "1" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND CONTROL = $3 ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier, control); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -2914,7 +2918,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -2931,7 +2935,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -2943,7 +2947,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -2957,7 +2961,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -2969,7 +2973,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -2994,7 +2998,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "2" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND CONTROL = $3 ORDER BY START_PERIOD DESC;", categoryIdentifier, conditionIdentifier, control); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -3023,7 +3027,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -3040,7 +3044,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -3052,7 +3056,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -3066,7 +3070,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -3078,7 +3082,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -3103,7 +3107,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "3" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND CONTROL = $3 ORDER BY END_PERIOD DESC;", categoryIdentifier, conditionIdentifier, control); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -3132,7 +3136,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -3149,7 +3153,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -3161,7 +3165,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -3175,7 +3179,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -3187,7 +3191,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -3212,7 +3216,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND CONTROL = $3 ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier, control); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -3241,7 +3245,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -3258,7 +3262,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -3270,7 +3274,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -3284,7 +3288,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -3296,7 +3300,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -3323,7 +3327,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			if conditionIdentifier == "1" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND EMAIL = $3 ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -3352,7 +3356,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -3369,7 +3373,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -3381,7 +3385,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -3395,7 +3399,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -3407,7 +3411,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -3432,7 +3436,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "2" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND EMAIL = $3 ORDER BY START_PERIOD DESC;", categoryIdentifier, conditionIdentifier, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -3461,7 +3465,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -3478,7 +3482,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -3490,7 +3494,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -3504,7 +3508,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -3516,7 +3520,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -3541,7 +3545,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "3" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND EMAIL = $3 ORDER BY END_PERIOD DESC;", categoryIdentifier, conditionIdentifier, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -3570,7 +3574,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -3587,7 +3591,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -3599,7 +3603,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -3613,7 +3617,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -3625,7 +3629,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -3650,7 +3654,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 AND EMAIL = $3 ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -3679,7 +3683,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -3696,7 +3700,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -3708,7 +3712,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -3722,7 +3726,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -3734,7 +3738,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -3760,7 +3764,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 		} else if len(categoryIdentifier) != 0 && len(mark) != 0 && len(control) != 0 {
 			// Execute the SQL query to get all surveys.
 			firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND MARK = $2 AND CONTROL = $3 ORDER BY CREATED_AT DESC;", categoryIdentifier, mark, control); if err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -3789,7 +3793,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					&survey.Blocked,
 					&survey.TotalRespondents,
 					&survey.PastRespondents); err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -3806,7 +3810,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 				INNER JOIN QUESTIONS
 				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 				WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -3818,7 +3822,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 					// Call "Scan()" function to the result set of the second SQL query.
 					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -3832,7 +3836,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN OPTIONS
 					ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 					WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -3844,7 +3848,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the third SQL query.
 						if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -3869,7 +3873,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 		} else if len(categoryIdentifier) != 0 && len(mark) != 0 && len(email) != 0 {
 			// Execute the SQL query to get all surveys.
 			firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND MARK = $2 AND EMAIL = $3 ORDER BY CREATED_AT DESC;", categoryIdentifier, mark, email); if err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -3898,7 +3902,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					&survey.Blocked,
 					&survey.TotalRespondents,
 					&survey.PastRespondents); err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -3915,7 +3919,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 				INNER JOIN QUESTIONS
 				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 				WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -3927,7 +3931,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 					// Call "Scan()" function to the result set of the second SQL query.
 					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -3941,7 +3945,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN OPTIONS
 					ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 					WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -3953,7 +3957,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the third SQL query.
 						if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -3978,7 +3982,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 		} else if len(categoryIdentifier) != 0 && len(control) != 0 && len(email) != 0 {
 			// Execute the SQL query to get all surveys.
 			firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONTROL = $2 AND EMAIL = $3 ORDER BY CREATED_AT DESC;", categoryIdentifier, control, email); if err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -4007,7 +4011,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					&survey.Blocked,
 					&survey.TotalRespondents,
 					&survey.PastRespondents); err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -4024,7 +4028,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 				INNER JOIN QUESTIONS
 				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 				WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -4036,7 +4040,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 					// Call "Scan()" function to the result set of the second SQL query.
 					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -4050,7 +4054,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN OPTIONS
 					ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 					WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -4062,7 +4066,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the third SQL query.
 						if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -4088,7 +4092,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			if conditionIdentifier == "1" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 AND CONTROL = $3 ORDER BY CREATED_AT DESC;", conditionIdentifier, mark, control); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -4117,7 +4121,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -4134,7 +4138,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -4146,7 +4150,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -4160,7 +4164,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -4172,7 +4176,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -4197,7 +4201,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "2" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 AND CONTROL = $3 ORDER BY START_PERIOD DESC;", conditionIdentifier, mark, control); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -4226,7 +4230,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -4243,7 +4247,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -4255,7 +4259,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -4269,7 +4273,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -4281,7 +4285,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -4306,7 +4310,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "3" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 AND CONTROL = $3 ORDER BY END_PERIOD DESC;", conditionIdentifier, mark, control); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -4335,7 +4339,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -4352,7 +4356,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -4364,7 +4368,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -4378,7 +4382,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -4390,7 +4394,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -4415,7 +4419,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 AND CONTROL = $3 ORDER BY CREATED_AT DESC;", conditionIdentifier, mark, control); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -4444,7 +4448,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -4461,7 +4465,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -4473,7 +4477,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -4487,7 +4491,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -4499,7 +4503,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -4526,7 +4530,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			if conditionIdentifier == "1" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 AND EMAIL = $3 ORDER BY CREATED_AT DESC;", conditionIdentifier, mark, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -4555,7 +4559,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -4572,7 +4576,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -4584,7 +4588,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -4598,7 +4602,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -4610,7 +4614,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -4635,7 +4639,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "2" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 AND EMAIL = $3 ORDER BY START_PERIOD DESC;", conditionIdentifier, mark, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -4664,7 +4668,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -4681,7 +4685,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -4693,7 +4697,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -4707,7 +4711,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -4719,7 +4723,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -4744,7 +4748,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "3" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 AND EMAIL = $3 ORDER BY END_PERIOD DESC;", conditionIdentifier, mark, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -4773,7 +4777,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -4790,7 +4794,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -4802,7 +4806,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -4816,7 +4820,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -4828,7 +4832,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -4853,7 +4857,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 AND EMAIL = $3 ORDER BY CREATED_AT DESC;", conditionIdentifier, mark, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -4882,7 +4886,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -4899,7 +4903,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -4911,7 +4915,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -4925,7 +4929,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -4937,7 +4941,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -4964,7 +4968,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			if conditionIdentifier == "1" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND CONTROL = $2 AND EMAIL = $3 ORDER BY CREATED_AT DESC;", conditionIdentifier, control, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -4993,7 +4997,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -5010,7 +5014,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -5022,7 +5026,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -5036,7 +5040,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -5048,7 +5052,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -5073,7 +5077,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "2" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND CONTROL = $2 AND EMAIL = $3 ORDER BY START_PERIOD DESC;", conditionIdentifier, control, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -5102,7 +5106,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -5119,7 +5123,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -5131,7 +5135,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -5145,7 +5149,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -5157,7 +5161,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -5182,7 +5186,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "3" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND CONTROL = $2 AND EMAIL = $3 ORDER BY END_PERIOD DESC;", conditionIdentifier, control, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -5211,7 +5215,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -5228,7 +5232,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -5240,7 +5244,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -5254,7 +5258,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -5266,7 +5270,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -5291,7 +5295,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND CONTROL = $2 AND EMAIL = $3 ORDER BY CREATED_AT DESC;", conditionIdentifier, control, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -5320,7 +5324,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -5337,7 +5341,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -5349,7 +5353,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -5363,7 +5367,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -5375,7 +5379,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -5401,7 +5405,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 		} else if len(mark) != 0 && len(control) != 0 && len(email)!= 0 {
 			// Execute the SQL query to get all surveys.
 			firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE MARK = $1 AND CONTROL = $2 AND EMAIL = $3 ORDER BY CREATED_AT DESC;", mark, control, email); if err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -5430,7 +5434,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					&survey.Blocked,
 					&survey.TotalRespondents,
 					&survey.PastRespondents); err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -5447,7 +5451,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 				INNER JOIN QUESTIONS
 				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 				WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -5459,7 +5463,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 					// Call "Scan()" function to the result set of the second SQL query.
 					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -5473,7 +5477,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN OPTIONS
 					ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 					WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -5485,7 +5489,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the third SQL query.
 						if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -5511,7 +5515,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			if conditionIdentifier == "1" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -5540,7 +5544,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -5557,7 +5561,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -5569,7 +5573,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -5583,7 +5587,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -5595,7 +5599,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -5620,7 +5624,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "2" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 ORDER BY START_PERIOD DESC;", categoryIdentifier, conditionIdentifier); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -5649,7 +5653,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -5666,7 +5670,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -5678,7 +5682,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -5692,7 +5696,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -5704,7 +5708,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -5729,7 +5733,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "3" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONDITION = $2 ORDER BY END_PERIOD DESC;", categoryIdentifier, conditionIdentifier); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -5758,7 +5762,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -5775,7 +5779,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -5787,7 +5791,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -5801,7 +5805,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -5813,7 +5817,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -5838,7 +5842,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = ? AND CONDITION = ? ORDER BY CREATED_AT DESC;", categoryIdentifier, conditionIdentifier); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -5867,7 +5871,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -5884,7 +5888,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -5896,7 +5900,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -5910,7 +5914,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -5922,7 +5926,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -5948,7 +5952,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 		} else if len(categoryIdentifier) != 0 && len(mark) != 0 {
 			// Execute the SQL query to get all surveys.
 			firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND MARK = $2 ORDER BY CREATED_AT DESC;", categoryIdentifier, mark); if err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -5977,7 +5981,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					&survey.Blocked,
 					&survey.TotalRespondents,
 					&survey.PastRespondents); err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -5994,7 +5998,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 				INNER JOIN QUESTIONS
 				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 				WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -6006,7 +6010,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 					// Call "Scan()" function to the result set of the second SQL query.
 					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -6020,7 +6024,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN OPTIONS
 					ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 					WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -6032,7 +6036,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the third SQL query.
 						if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -6057,7 +6061,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 		} else if len(categoryIdentifier) != 0 && len(control) != 0 {
 			// Execute the SQL query to get all surveys.
 			firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND CONTROL = $2 ORDER BY CREATED_AT DESC;", categoryIdentifier, control); if err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -6086,7 +6090,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					&survey.Blocked,
 					&survey.TotalRespondents,
 					&survey.PastRespondents); err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -6103,7 +6107,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 				INNER JOIN QUESTIONS
 				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 				WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -6115,7 +6119,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 					// Call "Scan()" function to the result set of the second SQL query.
 					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -6129,7 +6133,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN OPTIONS
 					ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 					WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -6141,7 +6145,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the third SQL query.
 						if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -6166,7 +6170,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 		} else if len(categoryIdentifier) != 0 && len(email) != 0 {
 			// Execute the SQL query to get all surveys.
 			firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 AND EMAIL = $2 ORDER BY CREATED_AT DESC;", categoryIdentifier, email); if err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -6195,7 +6199,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					&survey.Blocked,
 					&survey.TotalRespondents,
 					&survey.PastRespondents); err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -6212,7 +6216,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 				INNER JOIN QUESTIONS
 				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 				WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -6224,7 +6228,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 					// Call "Scan()" function to the result set of the second SQL query.
 					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -6238,7 +6242,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN OPTIONS
 					ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 					WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -6250,7 +6254,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the third SQL query.
 						if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -6276,7 +6280,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			if conditionIdentifier == "1" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 ORDER BY CREATED_AT DESC;", conditionIdentifier, mark); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -6305,7 +6309,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -6322,7 +6326,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -6334,7 +6338,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -6348,7 +6352,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -6360,7 +6364,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -6385,7 +6389,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "2" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 ORDER BY START_PERIOD DESC;", conditionIdentifier, mark); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -6414,7 +6418,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -6431,7 +6435,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -6443,7 +6447,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -6457,7 +6461,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -6469,7 +6473,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -6494,7 +6498,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "3" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 ORDER BY END_PERIOD DESC;", conditionIdentifier, mark); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -6523,7 +6527,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -6540,7 +6544,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -6552,7 +6556,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -6566,7 +6570,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -6578,7 +6582,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -6603,7 +6607,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND MARK = $2 ORDER BY CREATED_AT DESC;", conditionIdentifier, mark); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -6632,7 +6636,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -6649,7 +6653,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -6661,7 +6665,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -6675,7 +6679,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -6687,7 +6691,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -6714,7 +6718,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			if conditionIdentifier == "1" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND CONTROL = $2 ORDER BY CREATED_AT DESC;", conditionIdentifier, control); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -6743,7 +6747,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -6760,7 +6764,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -6772,7 +6776,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -6786,7 +6790,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -6798,7 +6802,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -6823,7 +6827,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "2" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND CONTROL = $2 ORDER BY START_PERIOD DESC;", conditionIdentifier, control); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -6852,7 +6856,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -6869,7 +6873,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -6881,7 +6885,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -6895,7 +6899,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -6907,7 +6911,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -6932,7 +6936,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "3" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND CONTROL = $2 ORDER BY END_PERIOD DESC;", conditionIdentifier, control); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -6961,7 +6965,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -6978,7 +6982,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -6990,7 +6994,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -7004,7 +7008,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -7016,7 +7020,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -7041,7 +7045,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND CONTROL = $2 ORDER BY CREATED_AT DESC;", conditionIdentifier, control); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -7070,7 +7074,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -7087,7 +7091,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -7099,7 +7103,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -7113,7 +7117,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -7125,7 +7129,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -7152,7 +7156,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			if conditionIdentifier == "1" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND EMAIL = $2 ORDER BY CREATED_AT DESC;", conditionIdentifier, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -7181,7 +7185,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -7198,7 +7202,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -7210,7 +7214,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -7224,7 +7228,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -7236,7 +7240,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -7261,7 +7265,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "2" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND EMAIL = $2 ORDER BY START_PERIOD DESC;", conditionIdentifier, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -7290,7 +7294,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -7307,7 +7311,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -7319,7 +7323,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -7333,7 +7337,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -7345,7 +7349,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -7370,7 +7374,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "3" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND EMAIL = $2 ORDER BY END_PERIOD DESC;", conditionIdentifier, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -7399,7 +7403,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -7416,7 +7420,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -7428,7 +7432,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -7442,7 +7446,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -7454,7 +7458,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -7479,7 +7483,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 AND EMAIL = $2 ORDER BY CREATED_AT DESC;", conditionIdentifier, email); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -7508,7 +7512,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -7525,7 +7529,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -7537,7 +7541,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -7551,7 +7555,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -7563,7 +7567,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -7589,7 +7593,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 		} else if len(mark) != 0 && len(control) != 0 {
 			// Execute the SQL query to get all surveys.
 			firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE MARK = $1 AND CONTROL = $2 ORDER BY CREATED_AT DESC;", mark, control); if err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -7618,7 +7622,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					&survey.Blocked,
 					&survey.TotalRespondents,
 					&survey.PastRespondents); err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -7635,7 +7639,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 				INNER JOIN QUESTIONS
 				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 				WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -7647,7 +7651,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 					// Call "Scan()" function to the result set of the second SQL query.
 					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -7661,7 +7665,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN OPTIONS
 					ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 					WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -7673,7 +7677,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the third SQL query.
 						if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -7698,7 +7702,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 		} else if len(mark) != 0 && len(email) != 0 {
 			// Execute the SQL query to get all surveys.
 			firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE MARK = $1 AND EMAIL = $2 ORDER BY CREATED_AT DESC;", mark, email); if err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -7727,7 +7731,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					&survey.Blocked,
 					&survey.TotalRespondents,
 					&survey.PastRespondents); err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -7744,7 +7748,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 				INNER JOIN QUESTIONS
 				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 				WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -7756,7 +7760,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 					// Call "Scan()" function to the result set of the second SQL query.
 					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -7770,7 +7774,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN OPTIONS
 					ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 					WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -7782,7 +7786,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the third SQL query.
 						if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -7807,7 +7811,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 		} else if len(control) != 0 && len(email) != 0 {
 			// Execute the SQL query to get all surveys.
 			firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONTROL = $1 AND EMAIL = $2 ORDER BY CREATED_AT DESC;", control, email); if err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -7836,7 +7840,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					&survey.Blocked,
 					&survey.TotalRespondents,
 					&survey.PastRespondents); err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -7853,7 +7857,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 				INNER JOIN QUESTIONS
 				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 				WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -7865,7 +7869,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 					// Call "Scan()" function to the result set of the second SQL query.
 					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -7879,7 +7883,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN OPTIONS
 					ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 					WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -7891,7 +7895,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the third SQL query.
 						if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -7916,7 +7920,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 		} else if len(categoryIdentifier) != 0 {
 			// Execute the SQL query to get all surveys.
 			firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CATEGORY = $1 ORDER BY CREATED_AT DESC;", categoryIdentifier); if err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -7945,7 +7949,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					&survey.Blocked,
 					&survey.TotalRespondents,
 					&survey.PastRespondents); err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -7962,7 +7966,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 				INNER JOIN QUESTIONS
 				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 				WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -7974,7 +7978,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 					// Call "Scan()" function to the result set of the second SQL query.
 					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -7988,7 +7992,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN OPTIONS
 					ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 					WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -8000,7 +8004,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the third SQL query.
 						if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -8026,7 +8030,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			if conditionIdentifier == "1" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 ORDER BY CREATED_AT DESC;", conditionIdentifier); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -8055,7 +8059,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -8072,7 +8076,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -8084,7 +8088,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -8098,7 +8102,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -8110,7 +8114,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -8135,7 +8139,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "2" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 ORDER BY START_PERIOD DESC;", conditionIdentifier); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -8164,7 +8168,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -8181,7 +8185,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -8193,7 +8197,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -8207,7 +8211,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -8219,7 +8223,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -8244,7 +8248,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else if conditionIdentifier == "3" {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 ORDER BY END_PERIOD DESC;", conditionIdentifier); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -8273,7 +8277,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -8290,7 +8294,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -8302,7 +8306,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -8316,7 +8320,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -8328,7 +8332,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -8353,7 +8357,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 			} else {
 				// Execute the SQL query to get all surveys.
 				firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONDITION = $1 ORDER BY CREATED_AT DESC;", conditionIdentifier); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -8382,7 +8386,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						&survey.Blocked,
 						&survey.TotalRespondents,
 						&survey.PastRespondents); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -8399,7 +8403,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN QUESTIONS
 					ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 					WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -8411,7 +8415,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the second SQL query.
 						if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -8425,7 +8429,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 						INNER JOIN OPTIONS
 						ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 						WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -8437,7 +8441,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 							// Call "Scan()" function to the result set of the third SQL query.
 							if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-								log.Println(err)
+								logger.Println(err)
 								utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 								return
 							}
@@ -8463,7 +8467,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 		} else if len(mark) != 0 {
 			// Execute the SQL query to get all surveys.
 			firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE MARK = $1 ORDER BY CREATED_AT DESC;", mark); if err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -8492,7 +8496,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					&survey.Blocked,
 					&survey.TotalRespondents,
 					&survey.PastRespondents); err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -8509,7 +8513,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 				INNER JOIN QUESTIONS
 				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 				WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -8521,7 +8525,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 					// Call "Scan()" function to the result set of the second SQL query.
 					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -8535,7 +8539,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN OPTIONS
 					ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 					WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -8547,7 +8551,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the third SQL query.
 						if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -8572,7 +8576,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 		} else if len(control) != 0 {
 			// Execute the SQL query to get all surveys.
 			firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE CONTROL = $1 ORDER BY CREATED_AT DESC;", control); if err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -8601,7 +8605,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					&survey.Blocked,
 					&survey.TotalRespondents,
 					&survey.PastRespondents); err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -8618,7 +8622,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 				INNER JOIN QUESTIONS
 				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 				WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -8630,7 +8634,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 					// Call "Scan()" function to the result set of the second SQL query.
 					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -8644,7 +8648,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN OPTIONS
 					ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 					WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -8656,7 +8660,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the third SQL query.
 						if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -8681,7 +8685,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 		} else if len(email) != 0 {
 			// Execute the SQL query to get all surveys.
 			firstQuery, err := database.DBSQL.Query("SELECT * FROM SURVEYS WHERE EMAIL = $1 ORDER BY CREATED_AT DESC;", email); if err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -8710,7 +8714,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					&survey.Blocked,
 					&survey.TotalRespondents,
 					&survey.PastRespondents); err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -8727,7 +8731,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 				INNER JOIN QUESTIONS
 				ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 				WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, survey.ID); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -8739,7 +8743,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 					// Call "Scan()" function to the result set of the second SQL query.
 					if err := secondQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -8753,7 +8757,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 					INNER JOIN OPTIONS
 					ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 					WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -8765,7 +8769,7 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 
 						// Call "Scan()" function to the result set of the third SQL query.
 						if err := thirdQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-							log.Println(err)
+							logger.Println(err)
 							utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 							return
 						}
@@ -8804,6 +8808,9 @@ var GetAlphaSurveys = func(responseWriter http.ResponseWriter, request *http.Req
 }
 
 var GetBetaSurveys = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a array.
 	var surveys []models.BetaSurvey
 
@@ -8814,7 +8821,7 @@ var GetBetaSurveys = func(responseWriter http.ResponseWriter, request *http.Requ
 	if len(keys) == 0 {
 		// CRUD interface of "GORM" ORM library to select all entries.
 		if err := database.DBGORM.Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-			log.Println(err)
+			logger.Println(err)
 			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 			return
 		}
@@ -8838,28 +8845,28 @@ var GetBetaSurveys = func(responseWriter http.ResponseWriter, request *http.Requ
 			if conditionIdentifier == "1" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition, mark, control, email.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ? AND MARK = ? AND CONTROL = ? AND EMAIL = ?", categoryIdentifier, conditionIdentifier, mark, control, email).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "2" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition, mark, control, email.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ? AND MARK = ? AND CONTROL = ? AND EMAIL = ?", categoryIdentifier, conditionIdentifier, mark, control, email).Order("START_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "3" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition, mark, control, email.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ? AND MARK = ? AND CONTROL = ? AND EMAIL = ?", categoryIdentifier, conditionIdentifier, mark, control, email).Order("END_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition, mark, control, email.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ? AND MARK = ? AND CONTROL = ? AND EMAIL = ?", categoryIdentifier, conditionIdentifier, mark, control, email).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -8868,28 +8875,28 @@ var GetBetaSurveys = func(responseWriter http.ResponseWriter, request *http.Requ
 			if conditionIdentifier == "1" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition, mark, control.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ? AND MARK = ? AND CONTROL = ?", categoryIdentifier, conditionIdentifier, mark, control).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "2" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition, mark, control.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ? AND MARK = ? AND CONTROL = ?", categoryIdentifier, conditionIdentifier, mark, control).Order("START_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "3" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition, mark, control.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ? AND MARK = ? AND CONTROL = ?", categoryIdentifier, conditionIdentifier, mark, control).Order("END_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition, mark, control.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ? AND MARK = ? AND CONTROL = ?", categoryIdentifier, conditionIdentifier, mark, control).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -8898,28 +8905,28 @@ var GetBetaSurveys = func(responseWriter http.ResponseWriter, request *http.Requ
 			if conditionIdentifier == "1" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition, mark, email.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ? AND MARK = ? AND EMAIL = ?", categoryIdentifier, conditionIdentifier, mark, email).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "2" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition, mark, email.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ? AND MARK = ? AND EMAIL = ?", categoryIdentifier, conditionIdentifier, mark, email).Order("START_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "3" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition, mark, email.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ? AND MARK = ? AND EMAIL = ?", categoryIdentifier, conditionIdentifier, mark, email).Order("END_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition, mark, email.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ? AND MARK = ? AND EMAIL = ?", categoryIdentifier, conditionIdentifier, mark, email).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -8928,28 +8935,28 @@ var GetBetaSurveys = func(responseWriter http.ResponseWriter, request *http.Requ
 			if conditionIdentifier == "1" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition, control, email.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ? AND CONTROL = ? AND EMAIL = ?", categoryIdentifier, conditionIdentifier, control, email).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "2" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition, control, email.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ? AND CONTROL = ? AND EMAIL = ?", categoryIdentifier, conditionIdentifier, control, email).Order("START_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "3" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition, control, email.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ? AND CONTROL = ? AND EMAIL = ?", categoryIdentifier, conditionIdentifier, control, email).Order("END_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition, control, email.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ? AND CONTROL = ? AND EMAIL = ?", categoryIdentifier, conditionIdentifier, control, email).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -8958,28 +8965,28 @@ var GetBetaSurveys = func(responseWriter http.ResponseWriter, request *http.Requ
 			if conditionIdentifier == "1" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of condition, mark, control, email.
 				if err := database.DBGORM.Where("CONDITION = ? AND MARK = ? CONTROL = ? AND EMAIL = ?", conditionIdentifier, mark, control, email).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "2" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of condition, mark, control, email.
 				if err := database.DBGORM.Where("CONDITION = ? AND MARK = ? CONTROL = ? AND EMAIL = ?", conditionIdentifier, mark, control, email).Order("START_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "3" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of condition, mark, control, email.
 				if err := database.DBGORM.Where("CONDITION = ? AND MARK = ? CONTROL = ? AND EMAIL = ?", conditionIdentifier, mark, control, email).Order("END_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of condition, mark, control, email.
 				if err := database.DBGORM.Where("CONDITION = ? AND MARK = ? CONTROL = ? AND EMAIL = ?", conditionIdentifier, mark, control, email).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -8987,7 +8994,7 @@ var GetBetaSurveys = func(responseWriter http.ResponseWriter, request *http.Requ
 		} else if len(categoryIdentifier) != 0 && len(mark) != 0 && len(control) != 0 && len(email) != 0 {
 			// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, mark, control, email.
 			if err := database.DBGORM.Where("CATEGORY = ? AND MARK = ? CONTROL = ? AND EMAIL = ?", categoryIdentifier, mark, control, email).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -8995,28 +9002,28 @@ var GetBetaSurveys = func(responseWriter http.ResponseWriter, request *http.Requ
 			if conditionIdentifier == "1" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition, mark.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ? AND MARK = ?", categoryIdentifier, conditionIdentifier, mark).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "2" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition, mark.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ? AND MARK = ?", categoryIdentifier, conditionIdentifier, mark).Order("START_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "3" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition, mark.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ? AND MARK = ?", categoryIdentifier, conditionIdentifier, mark).Order("END_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition, mark.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ? AND MARK = ?", categoryIdentifier, conditionIdentifier, mark).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -9025,28 +9032,28 @@ var GetBetaSurveys = func(responseWriter http.ResponseWriter, request *http.Requ
 			if conditionIdentifier == "1" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition, control.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ? AND CONTROL = ?", categoryIdentifier, conditionIdentifier, control).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "2" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition, control.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ? AND CONTROL = ?", categoryIdentifier, conditionIdentifier, control).Order("START_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "3" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition, control.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ? AND CONTROL = ?", categoryIdentifier, conditionIdentifier, control).Order("END_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition, control.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ? AND CONTROL = ?", categoryIdentifier, conditionIdentifier, control).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -9055,28 +9062,28 @@ var GetBetaSurveys = func(responseWriter http.ResponseWriter, request *http.Requ
 			if conditionIdentifier == "1" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition, email.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ? AND EMAIL = ?", categoryIdentifier, conditionIdentifier, email).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "2" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition, email.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ? AND EMAIL = ?", categoryIdentifier, conditionIdentifier, email).Order("START_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "3" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition, email.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ? AND EMAIL = ?", categoryIdentifier, conditionIdentifier, email).Order("END_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition, email.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ? AND EMAIL = ?", categoryIdentifier, conditionIdentifier, email).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -9084,21 +9091,21 @@ var GetBetaSurveys = func(responseWriter http.ResponseWriter, request *http.Requ
 		} else if len(categoryIdentifier) != 0 && len(mark) != 0 && len(control) != 0 {
 			// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, mark, control.
 			if err := database.DBGORM.Where("CATEGORY = ? AND MARK = ? AND CONTROL = ?", categoryIdentifier, mark, control).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
 		} else if len(categoryIdentifier) != 0 && len(mark) != 0 && len(email) != 0 {
 			// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, mark, email.
 			if err := database.DBGORM.Where("CATEGORY = ? AND MARK = ? AND EMAIL = ?", categoryIdentifier, mark, email).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
 		} else if len(categoryIdentifier) != 0 && len(control) != 0 && len(email) != 0 {
 			// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, control, email.
 			if err := database.DBGORM.Where("CATEGORY = ? AND CONTROL = ? AND EMAIL = ?", categoryIdentifier, control, email).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -9106,28 +9113,28 @@ var GetBetaSurveys = func(responseWriter http.ResponseWriter, request *http.Requ
 			if conditionIdentifier == "1" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of condition, mark, control.
 				if err := database.DBGORM.Where("CONDITION = ? AND MARK = ? AND CONTROL = ?", conditionIdentifier, mark, control).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "2" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of condition, mark, control.
 				if err := database.DBGORM.Where("CONDITION = ? AND MARK = ? AND CONTROL = ?", conditionIdentifier, mark, control).Order("START_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "3" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of condition, mark, control.
 				if err := database.DBGORM.Where("CONDITION = ? AND MARK = ? AND CONTROL = ?", conditionIdentifier, mark, control).Order("END_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of condition, mark, control.
 				if err := database.DBGORM.Where("CONDITION = ? AND MARK = ? AND CONTROL = ?", conditionIdentifier, mark, control).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -9136,28 +9143,28 @@ var GetBetaSurveys = func(responseWriter http.ResponseWriter, request *http.Requ
 			if conditionIdentifier == "1" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of condition, mark, email.
 				if err := database.DBGORM.Where("CONDITION = ? AND MARK = ? AND EMAIL = ?", conditionIdentifier, mark, email).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "2" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of condition, mark, email.
 				if err := database.DBGORM.Where("CONDITION = ? AND MARK = ? AND EMAIL = ?", conditionIdentifier, mark, email).Order("START_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "3" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of condition, mark, email.
 				if err := database.DBGORM.Where("CONDITION = ? AND MARK = ? AND EMAIL = ?", conditionIdentifier, mark, email).Order("END_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of condition, mark, email.
 				if err := database.DBGORM.Where("CONDITION = ? AND MARK = ? AND EMAIL = ?", conditionIdentifier, mark, email).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -9166,28 +9173,28 @@ var GetBetaSurveys = func(responseWriter http.ResponseWriter, request *http.Requ
 			if conditionIdentifier == "1" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of condition, control, email.
 				if err := database.DBGORM.Where("CONDITION = ? AND CONTROL = ? AND EMAIL = ?", conditionIdentifier, control, email).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "2" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of condition, control, email.
 				if err := database.DBGORM.Where("CONDITION = ? AND CONTROL = ? AND EMAIL = ?", conditionIdentifier, control, email).Order("START_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "3" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of condition, control, email.
 				if err := database.DBGORM.Where("CONDITION = ? AND CONTROL = ? AND EMAIL = ?", conditionIdentifier, control, email).Order("END_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of condition, control, email.
 				if err := database.DBGORM.Where("CONDITION = ? AND CONTROL = ? AND EMAIL = ?", conditionIdentifier, control, email).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -9195,7 +9202,7 @@ var GetBetaSurveys = func(responseWriter http.ResponseWriter, request *http.Requ
 		} else if len(mark) != 0 && len(control) != 0 && len(email)!= 0 {
 			// CRUD interface of "GORM" ORM library to find entries by mark, control, email.
 			if err := database.DBGORM.Where("MARK = ? AND CONTROL = ? AND EMAIL = ?", mark, control, email).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -9203,28 +9210,28 @@ var GetBetaSurveys = func(responseWriter http.ResponseWriter, request *http.Requ
 			if conditionIdentifier == "1" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ?", categoryIdentifier, conditionIdentifier).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "2" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ?", categoryIdentifier, conditionIdentifier).Order("START_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "3" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ?", categoryIdentifier, conditionIdentifier).Order("END_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, unique identifier of condition.
 				if err := database.DBGORM.Where("CATEGORY = ? AND CONDITION = ?", categoryIdentifier, conditionIdentifier).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -9232,21 +9239,21 @@ var GetBetaSurveys = func(responseWriter http.ResponseWriter, request *http.Requ
 		} else if len(categoryIdentifier) != 0 && len(mark) != 0 {
 			// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, mark.
 			if err := database.DBGORM.Where("CATEGORY = ? AND MARK = ?", categoryIdentifier, mark).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
 		} else if len(categoryIdentifier) != 0 && len(control) != 0 {
 			// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, control.
 			if err := database.DBGORM.Where("CATEGORY = ? AND CONTROL = ?", categoryIdentifier, control).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
 		} else if len(categoryIdentifier) != 0 && len(email) != 0 {
 			// CRUD interface of "GORM" ORM library to find entries by unique identifier of category, email.
 			if err := database.DBGORM.Where("CATEGORY = ? AND EMAIL = ?", categoryIdentifier, email).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -9254,28 +9261,28 @@ var GetBetaSurveys = func(responseWriter http.ResponseWriter, request *http.Requ
 			if conditionIdentifier == "1" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of condition, mark.
 				if err := database.DBGORM.Where("CONDITION = ? AND MARK = ?", conditionIdentifier, mark).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "2" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of condition, mark.
 				if err := database.DBGORM.Where("CONDITION = ? AND MARK = ?", conditionIdentifier, mark).Order("START_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "3" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of condition, mark.
 				if err := database.DBGORM.Where("CONDITION = ? AND MARK = ?", conditionIdentifier, mark).Order("END_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of condition, mark.
 				if err := database.DBGORM.Where("CONDITION = ? AND MARK = ?", conditionIdentifier, mark).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -9284,28 +9291,28 @@ var GetBetaSurveys = func(responseWriter http.ResponseWriter, request *http.Requ
 			if conditionIdentifier == "1" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of condition, control.
 				if err := database.DBGORM.Where("CONDITION = ? AND CONTROL = ?", conditionIdentifier, control).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "2" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of condition, control.
 				if err := database.DBGORM.Where("CONDITION = ? AND CONTROL = ?", conditionIdentifier, control).Order("START_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "3" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of condition, control.
 				if err := database.DBGORM.Where("CONDITION = ? AND CONTROL = ?", conditionIdentifier, control).Order("END_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of condition, control.
 				if err := database.DBGORM.Where("CONDITION = ? AND CONTROL = ?", conditionIdentifier, control).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -9314,28 +9321,28 @@ var GetBetaSurveys = func(responseWriter http.ResponseWriter, request *http.Requ
 			if conditionIdentifier == "1" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of condition, email.
 				if err := database.DBGORM.Where("CONDITION = ? AND EMAIL = ?", conditionIdentifier, email).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "2" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of condition, email.
 				if err := database.DBGORM.Where("CONDITION = ? AND EMAIL = ?", conditionIdentifier, email).Order("START_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "3" {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of condition, email.
 				if err := database.DBGORM.Where("CONDITION = ? AND EMAIL = ?", conditionIdentifier, email).Order("END_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else {
 				// CRUD interface of "GORM" ORM library to find entries by unique identifier of condition, email.
 				if err := database.DBGORM.Where("CONDITION = ? AND EMAIL = ?", conditionIdentifier, email).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -9343,28 +9350,28 @@ var GetBetaSurveys = func(responseWriter http.ResponseWriter, request *http.Requ
 		} else if len(mark) != 0 && len(control) != 0 {
 			// CRUD interface of "GORM" ORM library to find entries by mark, control.
 			if err := database.DBGORM.Where("MARK = ? AND CONTROL = ?", mark, control).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
 		} else if len(mark) != 0 && len(email) != 0 {
 			// CRUD interface of "GORM" ORM library to find entries by mark, email.
 			if err := database.DBGORM.Where("MARK = ? AND EMAIL = ?", mark, email).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
 		} else if len(control) != 0 && len(email) != 0 {
 			// CRUD interface of "GORM" ORM library to find entries by control, email.
 			if err := database.DBGORM.Where("CONTROL = ? AND EMAIL = ?", control, email).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
 		} else if len(categoryIdentifier) != 0 {
 			// CRUD interface of "GORM" ORM library to find entry by unique identifier of category.
 			if err := database.DBGORM.Where("CATEGORY = ?", categoryIdentifier).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -9372,28 +9379,28 @@ var GetBetaSurveys = func(responseWriter http.ResponseWriter, request *http.Requ
 			if conditionIdentifier == "1" {
 				// CRUD interface of "GORM" ORM library to find entry by unique identifier of condition.
 				if err := database.DBGORM.Where("CONDITION = ?", conditionIdentifier).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "2" {
 				// CRUD interface of "GORM" ORM library to find entry by unique identifier of condition.
 				if err := database.DBGORM.Where("CONDITION = ?", conditionIdentifier).Order("START_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else if conditionIdentifier == "3" {
 				// CRUD interface of "GORM" ORM library to find entry by unique identifier of condition.
 				if err := database.DBGORM.Where("CONDITION = ?", conditionIdentifier).Order("END_PERIOD DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
 			} else {
 				// CRUD interface of "GORM" ORM library to find entry by unique identifier of condition.
 				if err := database.DBGORM.Where("CONDITION = ?", conditionIdentifier).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -9401,21 +9408,21 @@ var GetBetaSurveys = func(responseWriter http.ResponseWriter, request *http.Requ
 		} else if len(mark) != 0 {
 			// CRUD interface of "GORM" ORM library to find entry by mark.
 			if err := database.DBGORM.Where("MARK = ?", mark).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
 		} else if len(control) != 0 {
 			// CRUD interface of "GORM" ORM library to find entry by control.
 			if err := database.DBGORM.Where("CONTROL = ?", control).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
 		} else if len(email) != 0 {
 			// CRUD interface of "GORM" ORM library to find entry by EMAIL.
 			if err := database.DBGORM.Where("EMAIL = ?", email).Order("CREATED_AT DESC").Find(&surveys).Error; err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -9436,6 +9443,9 @@ var GetBetaSurveys = func(responseWriter http.ResponseWriter, request *http.Requ
 }
 
 var GetAlphaSurvey = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Take variable from path with the help of "Gorilla Mux" library.
 	// The most common numeric conversions are Atoi (string to int) and Itoa (int to string).
 	surveyIdentifier := mux.Vars(request)["survey_id"]
@@ -9445,7 +9455,7 @@ var GetAlphaSurvey = func(responseWriter http.ResponseWriter, request *http.Requ
 
 	// CRUD interface of "GORM" ORM library to find entry by unique identifier.
 	if err := database.DBGORM.Where("ID = ?", surveyIdentifier).Find(&survey).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusNotFound, "http.StatusNotFound")
 		return
 	}
@@ -9462,7 +9472,7 @@ var GetAlphaSurvey = func(responseWriter http.ResponseWriter, request *http.Requ
 	INNER JOIN QUESTIONS
 	ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 	WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, surveyIdentifier); if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -9477,7 +9487,7 @@ var GetAlphaSurvey = func(responseWriter http.ResponseWriter, request *http.Requ
 
 		// Call "Scan()" function to the result set of the second SQL query.
 		if err := firstQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-			log.Println(err)
+			logger.Println(err)
 			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 			return
 		}
@@ -9491,7 +9501,7 @@ var GetAlphaSurvey = func(responseWriter http.ResponseWriter, request *http.Requ
 			INNER JOIN OPTIONS
 			ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 			WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-			log.Println(err)
+			logger.Println(err)
 			utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 			return
 		}
@@ -9503,7 +9513,7 @@ var GetAlphaSurvey = func(responseWriter http.ResponseWriter, request *http.Requ
 
 			// Call "Scan()" function to the result set of the second SQL query.
 			if err := secondQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -9524,6 +9534,9 @@ var GetAlphaSurvey = func(responseWriter http.ResponseWriter, request *http.Requ
 }
 
 var GetAvailableSurvey = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it to a "AlphaSurvey" struct.
 	survey := models.AlphaSurvey{}
 
@@ -9573,7 +9586,7 @@ var GetAvailableSurvey = func(responseWriter http.ResponseWriter, request *http.
 			INNER JOIN QUESTIONS
 			ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID
 			WHERE SURVEYS_QUESTIONS_RELATIONSHIP.SURVEY_ID = $1;`, surveyIdentifier); if err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -9588,7 +9601,7 @@ var GetAvailableSurvey = func(responseWriter http.ResponseWriter, request *http.
 
 				// Call "Scan()" function to the result set of the second SQL query.
 				if err := firstQuery.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -9602,7 +9615,7 @@ var GetAvailableSurvey = func(responseWriter http.ResponseWriter, request *http.
 				INNER JOIN OPTIONS
 				ON QUESTIONS_OPTIONS_RELATIONSHIP.OPTION_ID = OPTIONS.ID
 				WHERE QUESTIONS_OPTIONS_RELATIONSHIP.QUESTION_ID = $1;`, question.ID); if err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -9614,7 +9627,7 @@ var GetAvailableSurvey = func(responseWriter http.ResponseWriter, request *http.
 
 					// Call "Scan()" function to the result set of the second SQL query.
 					if err := secondQuery.Scan(&option.ID, &option.Text, &option.Position); err != nil {
-						log.Println(err)
+						logger.Println(err)
 						utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 						return
 					}
@@ -9643,6 +9656,9 @@ var GetAvailableSurvey = func(responseWriter http.ResponseWriter, request *http.
 }
 
 var GetBetaSurvey = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Take variable from path with the help of "Gorilla Mux" library.
 	// The most common numeric conversions are Atoi (string to int) and Itoa (int to string).
 	surveyIdentifier := mux.Vars(request)["survey_id"]
@@ -9652,7 +9668,7 @@ var GetBetaSurvey = func(responseWriter http.ResponseWriter, request *http.Reque
 
 	// CRUD interface of "GORM" ORM library to find entry by unique identifier.
 	if err := database.DBGORM.Where("ID = ?", surveyIdentifier).Find(&survey).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusNotFound, "http.StatusNotFound")
 		return
 	}
@@ -9662,6 +9678,9 @@ var GetBetaSurvey = func(responseWriter http.ResponseWriter, request *http.Reque
 }
 
 var CreateSurvey = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it to a "BetaSurvey" struct.
 	survey := models.BetaSurvey{}
 
@@ -9671,7 +9690,7 @@ var CreateSurvey = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// Decode reads the JSON value from its input and stores it in the value pointed to by "&survey".
 	if err := decoder.Decode(&survey); err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -9681,7 +9700,7 @@ var CreateSurvey = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// CRUD interface of "GORM" ORM library to create new entry.
 	if err := database.DBGORM.Save(&survey).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -9691,6 +9710,9 @@ var CreateSurvey = func(responseWriter http.ResponseWriter, request *http.Reques
 }
 
 var UpdateSurvey = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Take variable from path with the help of "Gorilla Mux" library.
 	// The most common numeric conversions are Atoi (string to int) and Itoa (int to string).
 	surveyIdentifier := mux.Vars(request)["survey_id"]
@@ -9700,7 +9722,7 @@ var UpdateSurvey = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// CRUD interface of "GORM" ORM library to find entry by unique identifier.
 	if err := database.DBGORM.Where("ID = ?", surveyIdentifier).Find(&survey).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusNotFound, "http.StatusNotFound")
 		return
 	}
@@ -9711,7 +9733,7 @@ var UpdateSurvey = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// Decode reads the JSON value from its input and stores it in the value pointed to by "&survey".
 	if err := decoder.Decode(&survey); err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -9721,7 +9743,7 @@ var UpdateSurvey = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// CRUD interface of "GORM" ORM library to update information of the entry.
 	if err := database.DBGORM.Save(&survey).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -9731,6 +9753,9 @@ var UpdateSurvey = func(responseWriter http.ResponseWriter, request *http.Reques
 }
 
 var DeleteSurvey = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Take variable from path with the help of "Gorilla Mux" library.
 	// The most common numeric conversions are Atoi (string to int) and Itoa (int to string).
 	surveyIdentifier := mux.Vars(request)["survey_id"]
@@ -9740,14 +9765,14 @@ var DeleteSurvey = func(responseWriter http.ResponseWriter, request *http.Reques
 
 	// CRUD interface of "GORM" ORM library to find entry by unique identifier.
 	if err := database.DBGORM.Where("ID = ?", surveyIdentifier).Find(&survey).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusNotFound, "http.StatusNotFound")
 		return
 	}
 
 	// CRUD interface of "GORM" ORM library to delete information of the entry.
 	if err := database.DBGORM.Delete(&survey).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}

@@ -7,6 +7,7 @@ import (
 	"github.com/mileusna/crontab"
 	"log"
 	"net/http"
+	"os"
 	"questionnaire/controllers"
 	"questionnaire/database"
 	"questionnaire/routes"
@@ -14,6 +15,9 @@ import (
 )
 
 func main()  {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// The application load environment variables from the ".env" file.
 	err := godotenv.Load(".env")
 	// If the ".env" file is not available the application will show an error message.
@@ -47,18 +51,18 @@ func main()  {
 	// Defining the application port for listening the HTTP requests.
 	port := utils.CheckEnvironmentVariable("APPLICATION_PORT")
 
-	log.Printf("Web service is running on %s port.", port)
+	logger.Printf("Web service is running on %s port.", port)
 
 	err = crontab.New().AddJob("* * * * *", controllers.Tracker); if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 		return
 	}
 
 	err = crontab.New().AddJob("* * * * *", controllers.Creator); if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 		return
 	}
 
 	// The application is starting to listen and serving the web service with CORS options.
-	log.Fatal(http.ListenAndServe(":" + port, handlers.CORS(headers, methods, origins)(router)))
+	logger.Fatal(http.ListenAndServe(":" + port, handlers.CORS(headers, methods, origins)(router)))
 }

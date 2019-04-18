@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 	"questionnaire/database"
 	"questionnaire/models"
 	"questionnaire/utils"
@@ -11,6 +12,9 @@ import (
 )
 
 var CreateSingleSurveyQuestionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a "SurveyQuestionRelationship" struct.
 	surveyQuestionRelationship := models.SurveyQuestionRelationship{}
 
@@ -20,7 +24,7 @@ var CreateSingleSurveyQuestionRelationship = func(responseWriter http.ResponseWr
 
 	// Decode reads the JSON value from its input and stores it in the value pointed to by "&surveyQuestionRelationship".
 	if err := decoder.Decode(&surveyQuestionRelationship); err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -30,7 +34,7 @@ var CreateSingleSurveyQuestionRelationship = func(responseWriter http.ResponseWr
 
 	// CRUD interface of "GORM" ORM library to create new entry.
 	if err := database.DBGORM.Save(&surveyQuestionRelationship).Error; err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -40,6 +44,9 @@ var CreateSingleSurveyQuestionRelationship = func(responseWriter http.ResponseWr
 }
 
 var CreateMultipleSurveyQuestionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	type RequestBody struct {
 		SurveyID string `json:"survey_id"`
 		Questions []int `json:"questions"`
@@ -54,7 +61,7 @@ var CreateMultipleSurveyQuestionRelationship = func(responseWriter http.Response
 
 	// Decode reads the JSON value from its input and stores it in the value pointed to by "&requestBody".
 	if err := decoder.Decode(&requestBody); err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -70,7 +77,7 @@ var CreateMultipleSurveyQuestionRelationship = func(responseWriter http.Response
 
 	// Make SQL query by "database/sql" package.
 	_, err := database.DBSQL.Exec(sqlStatement.String()); if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -80,6 +87,9 @@ var CreateMultipleSurveyQuestionRelationship = func(responseWriter http.Response
 }
 
 var DeleteSingleSurveyQuestionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a array of URL parameters from the request.
 	keys := request.URL.Query()
 
@@ -98,7 +108,7 @@ var DeleteSingleSurveyQuestionRelationship = func(responseWriter http.ResponseWr
 
 			// CRUD interface of "GORM" ORM library to delete information of the entry.
 			if err := database.DBGORM.Where("SURVEY_ID = ? AND QUESTION_ID = ?", surveyIdentifier, questionIdentifier).Delete(&surveyQuestionRelationship).Error; err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -116,6 +126,9 @@ var DeleteSingleSurveyQuestionRelationship = func(responseWriter http.ResponseWr
 }
 
 var DeleteMultipleSurveyQuestionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a array of URL parameters from the request.
 	keys := request.URL.Query()
 
@@ -131,7 +144,7 @@ var DeleteMultipleSurveyQuestionRelationship = func(responseWriter http.Response
 
 			// CRUD interface of "GORM" ORM library to delete information of the entry.
 			if err := database.DBGORM.Where("SURVEY_ID = ?", surveyIdentifier).Delete(&surveyQuestionRelationship).Error; err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -149,6 +162,9 @@ var DeleteMultipleSurveyQuestionRelationship = func(responseWriter http.Response
 }
 
 var GetBetaSurveysQuestionsRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Variable has been initialized by assigning it a array of URL parameters from the request.
 	keys := request.URL.Query()
 
@@ -164,7 +180,7 @@ var GetBetaSurveysQuestionsRelationship = func(responseWriter http.ResponseWrite
 		if len(surveyIdentifier) != 0 {
 			// Make SQL query by "database/sql" package.
 			rows, err := database.DBSQL.Query("SELECT ID, NAME, WIDGET FROM SURVEYS_QUESTIONS_RELATIONSHIP INNER JOIN QUESTIONS ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID WHERE SURVEY_ID = $1", surveyIdentifier); if err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -179,7 +195,7 @@ var GetBetaSurveysQuestionsRelationship = func(responseWriter http.ResponseWrite
 
 				// Call "Scan()" function on the result set of the SQL query.
 				if err := rows.Scan(&question.ID, &question.Text, &question.Widget); err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
@@ -207,6 +223,9 @@ var GetBetaSurveysQuestionsRelationship = func(responseWriter http.ResponseWrite
 }
 
 var CheckSurveyQuestionRelationship = func(responseWriter http.ResponseWriter, request *http.Request) {
+	// Create and customize logger.
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// Initialize "Result" struct.
 	type Result struct {
 		ID string `gorm:"primary_key" json:"survey_id"`
@@ -239,7 +258,7 @@ var CheckSurveyQuestionRelationship = func(responseWriter http.ResponseWriter, r
 			AND SURVEYS.CONDITION = 2
 			AND SURVEYS.BLOCKED = true
 			GROUP BY ID;`, questionIdentifier); if err != nil {
-				log.Println(err)
+				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
 			}
@@ -253,7 +272,7 @@ var CheckSurveyQuestionRelationship = func(responseWriter http.ResponseWriter, r
 
 				// Call "Scan()" function to the result set of the second SQL query.
 				if err := rows.Scan(&result.ID, &result.Name, &result.Email); err != nil {
-					log.Println(err)
+					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
 				}
