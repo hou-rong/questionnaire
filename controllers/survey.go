@@ -9558,19 +9558,19 @@ var GetAvailableSurvey = func(responseWriter http.ResponseWriter, request *http.
 		if len(surveyIdentifier) != 0 && len(email) != 0 {
 			// Check availability of the survey in the PostgreSQL database.
 			if err := database.DBGORM.Where("ID = ?", surveyIdentifier).Find(&survey).Error; err != nil {
-				utils.ResponseWithSuccess(responseWriter, http.StatusOK, "Survey not found.")
+				utils.ResponseWithSuccess(responseWriter, http.StatusNotFound, "Survey not found.")
 				return
 			}
 
 			// Проверка срока прохождения опроса.
 			if survey.EndPeriod.Equal(time.Now()) || survey.EndPeriod.Before(time.Now()) {
-				utils.ResponseWithSuccess(responseWriter, http.StatusOK, "The survey timed out.")
+				utils.ResponseWithSuccess(responseWriter, http.StatusForbidden, "The survey timed out.")
 				return
 			}
 
 			// Check if the survey is available to the employee.
 			if err := database.DBGORM.Where("SURVEY_ID = ? AND EMPLOYEE = ? AND STATUS = FALSE", surveyIdentifier, email).Find(&surveyEmployeeRelationship).Error; err != nil {
-				utils.ResponseWithSuccess(responseWriter, http.StatusOK, "The survey is not available to the employee.")
+				utils.ResponseWithSuccess(responseWriter, http.StatusForbidden, "The survey is not available to the employee.")
 				return
 			}
 
