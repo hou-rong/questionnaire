@@ -63,7 +63,7 @@ func ConnectPostgreSQL() {
 	// Enable logging mode of "gorm" package.
 	DBGORM.LogMode(true)
 
-	log.Println("Web service successfully connected to remote PostgreSQL database with the help of \"gorm\" package.")
+	logger.Println("Web service successfully connected to remote PostgreSQL database with the help of \"gorm\" package.")
 
 	// The application defining the connection string for the remote PostgreSQL database with the help of the "database/sql" package.
 	SQLDatabaseURL:= fmt.Sprintf("user=%s password=%s host=%s dbname=%s sslmode=disable", databaseUser, databasePassword, databaseHost, databaseName)
