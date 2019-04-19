@@ -19,7 +19,7 @@ The main task of the function is to check the value of the environment variable.
 func CheckEnvironmentVariable(key string) string{
 	value, ok := os.LookupEnv(key)
 	if !ok {
-		log.Fatalf("The \"%s\" environment variable does not exist.", key)
+		log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile).Fatalf("The \"%s\" environment variable does not exist.", key)
 	}
 	return value
 }
@@ -34,7 +34,7 @@ The main task of the function is to create and configure a response with JSON.
 func Response(responseWriter http.ResponseWriter, statusCode int, information interface{}) {
 	response, err := json.Marshal(information)
 	if err != nil {
-		log.Println(err)
+		log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile).Println(err)
 		responseWriter.WriteHeader(http.StatusInternalServerError)
 		_, _ = responseWriter.Write([]byte(err.Error()))
 		return
