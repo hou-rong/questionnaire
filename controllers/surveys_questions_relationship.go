@@ -179,7 +179,7 @@ var GetBetaSurveysQuestionsRelationship = func(responseWriter http.ResponseWrite
 		// Check the value of the variables.
 		if len(surveyIdentifier) != 0 {
 			// Make SQL query by "database/sql" package.
-			rows, err := database.DBSQL.Query("SELECT ID, NAME, WIDGET FROM SURVEYS_QUESTIONS_RELATIONSHIP INNER JOIN QUESTIONS ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID WHERE SURVEY_ID = $1", surveyIdentifier); if err != nil {
+			rows, err := database.DBSQL.Query("SELECT ID, TEXT, WIDGET, REQUIRED, POSITION, CATEGORY FROM SURVEYS_QUESTIONS_RELATIONSHIP INNER JOIN QUESTIONS ON SURVEYS_QUESTIONS_RELATIONSHIP.QUESTION_ID = QUESTIONS.ID WHERE SURVEY_ID = $1", surveyIdentifier); if err != nil {
 				logger.Println(err)
 				utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 				return
@@ -194,7 +194,7 @@ var GetBetaSurveysQuestionsRelationship = func(responseWriter http.ResponseWrite
 				var question models.BetaQuestion
 
 				// Call "Scan()" function on the result set of the SQL query.
-				if err := rows.Scan(&question.ID, &question.Text, &question.Widget); err != nil {
+				if err := rows.Scan(&question.ID, &question.Text, &question.Widget, &question.Required, &question.Position, &question.Category); err != nil {
 					logger.Println(err)
 					utils.ResponseWithError(responseWriter, http.StatusInternalServerError, err.Error())
 					return
