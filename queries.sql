@@ -595,3 +595,8 @@ CREATE DATABASE questionnaire_production WITH TEMPLATE questionnaire_development
  */
 ALTER TABLE QUESTIONS ADD CATEGORY INT;
 ALTER TABLE QUESTIONS ADD CONSTRAINT QUESTIONS_CATEGORY_FKEY FOREIGN KEY (CATEGORY) REFERENCES CATEGORIES(ID);
+
+/*
+ * Добавить столбец "SEND" в таблице "surveys_employees_relationship".
+ */
+ALTER TABLE surveys_employees_relationship ADD COLUMN SEND BOOLEAN NOT NULL DEFAULT FALSE;
