@@ -17,7 +17,7 @@ Function name:
 "ConnectOracle"
 
 Function description:
-The main task of the function is to check the connection to remote Oracle database with the help of "database/sql" package.
+The main task of the function is to check the connection to remote Oracle database with the help of "gopkg.in/goracle.v2" package.
 */
 func ConnectOracle() {
 	// Create and customize logger.
@@ -38,10 +38,10 @@ func ConnectOracle() {
 	databasePort := utils.CheckEnvironmentVariable("ORACLE_PORT")
 	databaseName := utils.CheckEnvironmentVariable("ORACLE_DATABASE_NAME")
 
-	// The application defining the connection string for the remote Oracle database with the help of the "gorm" package.
+	// The application defining the connection string for the remote Oracle database with the help of the "gopkg.in/goracle.v2" package.
 	databaseURL:= fmt.Sprintf("%s/%s@%s:%s/%s", databaseUser, databasePassword, databaseHost, databasePort, databaseName)
 
-	// The application create connection pool to remote Oracle database with the help of the "database/sql" package.
+	// The application create connection pool to remote Oracle database with the help of the "gopkg.in/goracle.v2" package.
 	OracleDB, err = sql.Open("goracle", databaseURL)
 	// If connection pool creation process was unsuccessful the application show an error message.
 	if err != nil {
@@ -49,7 +49,7 @@ func ConnectOracle() {
 		panic(err)
 	}
 
-	// The application ping the remote PostgreSQL database with the help of "database/sql" package.
+	// The application ping the remote PostgreSQL database with the help of "gopkg.in/goracle.v2" package.
 	err = OracleDB.Ping()
 	// If ping process to the remote PostgreSQL database raise error the application show an error message.
 	if err != nil {

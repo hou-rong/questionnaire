@@ -30,7 +30,7 @@ func main()  {
 	defer database.SQLDisconnectPostgreSQL()
 	defer database.GORMDisconnectPostgreSQL()
 
-	// The application check the connection to remote Oracle database with the help of "database/sql" packages.
+	// The application check the connection to remote Oracle database with the help of "gopkg.in/goracle.v2" packages.
 	database.ConnectOracle()
 	defer database.DisconnectOracle()
 

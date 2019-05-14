@@ -32,7 +32,7 @@ var CreateMultipleAnswer = func(responseWriter http.ResponseWriter, request *htt
 	// Build SQL statement.
 	var sqlStatement strings.Builder
 
-	// check the length of the value in the request body element.
+	// Check the length of the value in the request body element.
 	if len(requestBody.OptionID) != 0 {
 		sqlStatement.WriteString("INSERT INTO ANSWERS (SURVEY_ID, EMPLOYEE, QUESTION_ID, QUESTION_TEXT, OPTION_ID, OPTION_TEXT) SELECT '")
 		sqlStatement.WriteString(requestBody.SurveyID)
