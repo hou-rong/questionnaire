@@ -63,6 +63,11 @@ func main()  {
 		return
 	}
 
+	err = crontab.New().AddJob("* * * * *", controllers.History); if err != nil {
+		logger.Fatal(err)
+		return
+	}
+
 	// The application is starting to listen and serving the web service with CORS options.
 	logger.Fatal(http.ListenAndServe(":" + port, handlers.CORS(headers, methods, origins)(router)))
 }

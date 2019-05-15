@@ -600,3 +600,52 @@ ALTER TABLE QUESTIONS ADD CONSTRAINT QUESTIONS_CATEGORY_FKEY FOREIGN KEY (CATEGO
  * Добавить столбец "SEND" в таблице "surveys_employees_relationship".
  */
 ALTER TABLE surveys_employees_relationship ADD COLUMN SEND BOOLEAN NOT NULL DEFAULT FALSE;
+
+/*
+ * Создать таблицу "ORGANIZATIONAL_STRUCTURE_HISTORY".
+ */
+CREATE TABLE ORGANIZATIONAL_STRUCTURE_HISTORY (
+  ORG_STRUCTURE_VERSION_ID INT, /* Версия организационной структуры */
+  VER_D_FROM TIMESTAMP, /* Дата действия c текущей организационной структурой */
+  VER_PREV_D_FROM TIMESTAMP, /* Период действия С прошлой организационной структурой */
+  VER_PREV_D_TO TIMESTAMP, /* Период действия ПО прошлой организационной структурой */
+  ORGANIZATION_ID INT, /* ID подразделения */
+  PARENT_ORGANIZATION_ID INT, /* ID предыдущего подразделения */
+  ORGANIZATION_NAME VARCHAR, /* Наименование подразделения */
+  ORGANIZATION_RANG INT, /* Уровень вложенности подразделения */
+  TREE_ORGANIZATION_ID INT, /* Ветка ID подразделения */
+  TREE_ORGANIZATION_NAME VARCHAR, /* Ветка наименование подразделения */
+  RANG1_ORGANIZATION_ID INT, /* Корневой ID подразделения */
+  RANG1_ORGANIZATION_NAME VARCHAR, /* Корневое наименование подразделения */
+  CREATION_DATE TIMESTAMP, /* Дата обновления */
+  SURVEY_ID UUID /* ID опроса */
+);
+
+/*
+ * Добавить первичный ключ в таблицу "ORGANIZATIONAL_STRUCTURE_HISTORY" с каскадным удалением.
+ */
+ALTER TABLE ORGANIZATIONAL_STRUCTURE_HISTORY
+ADD CONSTRAINT organizational_structure_history_survey_id_fkey
+FOREIGN KEY (SURVEY_ID)
+REFERENCES SURVEYS(ID)
+ON DELETE CASCADE;
+
+/*
+ * Создать UNIQUE CONSTRAINT для таблицы "ORGANIZATIONAL_STRUCTURE_HISTORY".
+ */
+ALTER TABLE ORGANIZATIONAL_STRUCTURE_HISTORY ADD CONSTRAINT ORGANIZATIONAL_STRUCTURE_HISTORY_UNIQUE_KEY UNIQUE (
+  ORG_STRUCTURE_VERSION_ID,
+  VER_D_FROM,
+  VER_PREV_D_FROM,
+  VER_PREV_D_TO,
+  ORGANIZATION_ID,
+  PARENT_ORGANIZATION_ID,
+  ORGANIZATION_NAME,
+  ORGANIZATION_RANG,
+  TREE_ORGANIZATION_ID,
+  TREE_ORGANIZATION_NAME,
+  RANG1_ORGANIZATION_ID,
+  RANG1_ORGANIZATION_NAME,
+  CREATION_DATE,
+  SURVEY_ID
+);
