@@ -28,32 +28,7 @@ var History = func() {
 	// Check the length of the array.
 	if len(surveyIdentifiers) != 0 {
 		// Make SQL query to remote Oracle database.
-		structures, err := database.OracleDB.Query(`SELECT DISTINCT 
-        	O.ORGANIZATION_ID,
-            O.ORGANIZATION_NAME,
-            O.ORGANIZATION_RANG,
-            O.PARENT_ORGANIZATION_ID
-		FROM
-			ONLREP.NFS_DIM_ORG_STR O
-		JOIN (
-			SELECT
-				DISTINCT O.ORGANIZATION_ID,
-				O.TREE_ORGANIZATION_ID || '\' TREE_ORGANIZATION_ID
-			FROM
-				ONLREP.NFS_DIM_ORG_STR O
-			JOIN ONLREP.NFS_DIM_ORG_PER P ON
-				P.ORGANIZATION_ID = O.ORGANIZATION_ID
-			WHERE
-				1 = 1
-		) FO ON
-		FO.TREE_ORGANIZATION_ID LIKE '%\' || O.ORGANIZATION_ID || '\%'
-		WHERE
-			ORGANIZATION_NAME IS NOT NULL
-		AND 
-			RANG1_ORGANIZATION_ID NOT IN(28825, 27624, 27626, 28833, 29033)
-		ORDER BY
-			ORGANIZATION_RANG,
-			ORGANIZATION_ID`); if err != nil {
+		structures, err := database.OracleDB.Query("SELECT * FROM NFS_DIM_ORG_STR WHERE ORGANIZATION_NAME IS NOT NULL AND RANG1_ORGANIZATION_ID NOT IN (28825, 27624, 27626, 28833, 29033)"); if err != nil {
 			logger.Println(err)
 			return
 		}
