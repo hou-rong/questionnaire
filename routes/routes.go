@@ -12,7 +12,6 @@ Function name:
 Function description:
 The function provides a list of all available URLs which would use RESTful web service.
 */
-
 func Handle(router *mux.Router) {
 	router.HandleFunc("/api/categories", controllers.GetCategories).Methods("GET")
 	router.HandleFunc("/api/category/{category_id:[0-9]+}", controllers.GetCategory).Methods("GET")

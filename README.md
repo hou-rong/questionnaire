@@ -47,8 +47,9 @@ List of all available routes of the project you can see in `routes/routes.go` fi
 Several scripts are used to update and synchronize data in the sources:
 * `controllers/creator.go`
 * `controllers/tracker.go`
+* `controllers/history.go`
 
-Both of these scripts run every minute (`* * * * *`).
+All of these scripts run every minute (`* * * * *`).
 
 # Database Details
 
