@@ -78,11 +78,18 @@ func Worker(channel <- chan Entry) {
 		// Build first SQL statement.
 		var firstStatement strings.Builder
 		firstStatement.WriteString(`SELECT 
-			REPLACE('''' || RTRIM(XMLAGG(XMLELEMENT(e, P_EMAIL, ',').EXTRACT('//text()')).GetClobVal(), ',') || '''', ',', '''' || ',' || '''') AS EMPLOYEES
+			REPLACE('''' || RTRIM(XMLAGG(XMLELEMENT(e, P_EMAIL, ',').EXTRACT('//text()')).GetClobVal(), ',') || '''', ',', '''' || ',' || '''') AS EMAILS,
+			REPLACE('''' || RTRIM(XMLAGG(XMLELEMENT(e, NFS_DIM_ORG_STR.TREE_ORGANIZATION_ID, ',').EXTRACT('//text()')).GetClobVal(), ',') || '''', ',', '''' || ',' || '''') AS TREE_ORGANIZATIONS
 		FROM
-			NFS_DIM_ORG_PER 
+			NFS_DIM_ORG_PER
+		LEFT OUTER JOIN
+			NFS_DIM_ORG_STR
+		ON 
+			NFS_DIM_ORG_PER.ORGANIZATION_ID = NFS_DIM_ORG_STR.ORGANIZATION_ID 
 		WHERE 
-			P_EMAIL IS NOT NULL AND ORGANIZATION_ID IN (`)
+			P_EMAIL IS NOT NULL
+		AND
+			NFS_DIM_ORG_PER.ORGANIZATION_ID IN (`)
 		for i := 1; i <= len(entry.Organizations); i++ {
 			firstStatement.WriteString(":value")
 			firstStatement.WriteString(strconv.Itoa(i))
@@ -101,19 +108,19 @@ func Worker(channel <- chan Entry) {
 		// Create struct called "Employees".
 		type Employees struct {
 			Emails string
+			TreeOrganizations string
 		}
 
 		// Variable has been initialized by assigning it a "Employees" struct.
 		var employees Employees
-
 		/*
 		Make SQL query by "go-goracle/goracle" package.
 
-		| Employees                                                                |
-		|--------------------------------------------------------------------------|
-		| 'SKorzhavykh@beeline.kz','YKulikpayev@beeline.kz','SChebykin@beeline.kz' |
+		| EMAILS                                                                   | TREE_ORGANIZATIONS                                                 |
+		|--------------------------------------------------------------------------|--------------------------------------------------------------------|
+		| 'SKorzhavykh@beeline.kz','YKulikpayev@beeline.kz','SChebykin@beeline.kz' | '\27623\30553\28134\30503\30514\28274', '\27623\30557\30056\28475' |
 		*/
-		if err := database.OracleDB.QueryRow(firstStatement.String(), arguments...).Scan(&employees.Emails); err != nil {
+		if err := database.OracleDB.QueryRow(firstStatement.String(), arguments...).Scan(&employees.Emails, &employees.TreeOrganizations); err != nil {
 			logger.Println(err)
 			return
 		}
@@ -124,6 +131,8 @@ func Worker(channel <- chan Entry) {
 		secondStatement.WriteString(entry.SurveyIdentifier)
 		secondStatement.WriteString("', ARRAY[")
 		secondStatement.WriteString(employees.Emails)
+		secondStatement.WriteString("], ARRAY[")
+		secondStatement.WriteString(employees.TreeOrganizations)
 		secondStatement.WriteString("])")
 
 		// Make SQL query by "database/sql" package which insert multiple rows by one query.
