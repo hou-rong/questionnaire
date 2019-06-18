@@ -89,6 +89,8 @@ func Worker(channel <- chan Entry) {
 		WHERE 
 			P_EMAIL IS NOT NULL
 		AND
+			P_PEOPLE_GROUP NOT IN ('Сотрудницы, находящиеся в декрете')
+		AND
 			NFS_DIM_ORG_PER.ORGANIZATION_ID IN (`)
 		for i := 1; i <= len(entry.Organizations); i++ {
 			firstStatement.WriteString(":value")
