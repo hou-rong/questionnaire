@@ -46,7 +46,7 @@ var CreateMultipleAnswer = func(responseWriter http.ResponseWriter, request *htt
 		sqlStatement.WriteString(utils.ConvertIntArrayToString(requestBody.OptionID))
 		sqlStatement.WriteString("]) AS OPTION_ID, UNNEST(ARRAY[")
 		sqlStatement.WriteString(utils.ConvertStringArrayToString(requestBody.OptionText))
-		sqlStatement.WriteString("]) AS OPTION_TEXT")
+		sqlStatement.WriteString("]) AS OPTION_TEXT ON CONFLICT ON CONSTRAINT ANSWERS_UNIQUE_KEY DO NOTHING")
 	} else {
 		sqlStatement.WriteString("INSERT INTO ANSWERS (SURVEY_ID, EMPLOYEE, QUESTION_ID, QUESTION_TEXT, OPTION_TEXT) SELECT '")
 		sqlStatement.WriteString(requestBody.SurveyID)
@@ -58,7 +58,7 @@ var CreateMultipleAnswer = func(responseWriter http.ResponseWriter, request *htt
 		sqlStatement.WriteString(utils.ConvertStringArrayToString(requestBody.QuestionText))
 		sqlStatement.WriteString("]) AS QUESTION_TEXT, UNNEST(ARRAY[")
 		sqlStatement.WriteString(utils.ConvertStringArrayToString(requestBody.OptionText))
-		sqlStatement.WriteString("]) AS OPTION_TEXT")
+		sqlStatement.WriteString("]) AS OPTION_TEXT ON CONFLICT ON CONSTRAINT ANSWERS_UNIQUE_KEY DO NOTHING")
 	}
 
 	// Make SQL query by "database/sql" package.
